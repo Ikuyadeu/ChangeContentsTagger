@@ -18,7 +18,7 @@ if ARGC > 2:
     DIFF_DIR_PATH = ARGV[1] + "/"
     OUTPUT_PATH = ARGV[2]
 else:
-    print "Usage: %s DIFF_FILE_PATH OUTPUT_PATH [--per_patch]" % ARGV[0]
+    print "Usage: python %s DIFF_DIR_PATH OUTPUT_PATH [--per_patch]" % ARGV[0]
     sys.exit()
 
 """"
@@ -105,16 +105,18 @@ def get_line_kind(line):
     else:
         return EQUAL
 
-FILE_LIST = [(pull_no, patch_no) for pull_no in range(MIM_PULL_NO, MAX_PULL_NO)
+FILE_LIST = [(pull_no, patch_no) for pull_no in range(MIM_PULL_NO, MAX_PULL_NO + 1)
              for patch_no in range(1, 10)
              if os.path.isfile(DIFF_DIR_PATH + str(pull_no) + "_" + str(patch_no) + ".diff")]
 FILE_NUM = len(FILE_LIST)
 
 with open(OUTPUT_PATH, "w") as output_diff:
+    # Setting csv writer
     DIFF_WRITER = csv.writer(output_diff, lineterminator="\n")
+    # output column Name
     DIFF_WRITER.writerow(("PullNo", "PatchNo", "CHANGED_CONTENTS",
                           "SpaceOrTab", "NewLine", "UpperOrLower",
-                          "NoDeleted", "Inserted"))
+                          "IsInserted", "IsDeleted"))
 
     INSERTED_DOC = ""
     for i, FILE in enumerate(FILE_LIST):
@@ -163,6 +165,9 @@ with open(OUTPUT_PATH, "w") as output_diff:
             # DIFF_CONTENTS = [x[1] for x in DIFF_CONTENTS]
 
             # Get tags
+            IS_INSERTED = len(INSERTED_CONTENTS) > 0
+            IS_DELETED = len(DELETED_CONTENTS) > 0
+
             NEW_LINE = [x[1] for x in DIFF_CONTENTS if x[1] == "\n"]
             SPACE_OR_TAB = [x[1] for x in DIFF_CONTENTS if RE_SPACE_TAB.match(x[1])]
 
@@ -175,9 +180,6 @@ with open(OUTPUT_PATH, "w") as output_diff:
                             x[1].upper() == before_diff[1].upper()):
                         UPPER_OR_LOWER += 1
 
-            ONLY_INSERTED = len(DELETED_CONTENTS) == 0
-            ONLY_DELETED = len(INSERTED_CONTENTS) == 0
-
             DIFF_WRITER.writerow((pull_no, patch_no, len(DIFF_CONTENTS),
                                   len(SPACE_OR_TAB), len(NEW_LINE), UPPER_OR_LOWER,
-                                  ONLY_INSERTED, ONLY_DELETED))
+                                  IS_INSERTED, IS_DELETED))
