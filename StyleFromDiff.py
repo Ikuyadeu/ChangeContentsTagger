@@ -21,12 +21,13 @@ else:
     print "Usage: %s DIFF_FILE_PATH OUTPUT_PATH [--per_patch]" % ARGV[0]
     sys.exit()
 
+""""
+--per_patch: Get diff from before patch,
+if non Get diff from base code
+"""
 OPTIONS = [option for option in ARGV if option.startswith('--')]
 
-if '--per_patch' in OPTIONS:
-    PER_PATCH = True
-else:
-    PER_PATCH = False
+PER_PATCH = '--per_patch' in OPTIONS
 
 
 """
@@ -37,19 +38,32 @@ MAX_PULL_NO = 500
 
 
 """
-flag value
+Flag value
+@equal: nochange line
+@inserted: inserted line
+@deleted: deleted line
+
+@FIRST: first line per changed file
+@DIFF_RANGE: inform changed line between @ mark
+@END: end line per diff file
 """
-DIFF_RANGE = 2
+EQUAL = 0
 INSERTED = 1
 DELETED = -1
-NO_CHANGE = 0
-FIRST = 3
+FIRST = 2
+DIFF_RANGE = 3
 END = 4
 
 """
-Regex from diff file
+Regex to identify diff column
+RE_FIRST:
 """
-FIRST_LINE = re.compile(r"""(?x)^
+# TO_FILE_DIFF = re.compile(r"(^(\+{3}) .+$\n?| (-) .* (={4})$\n?)")
+# FROM_FILE_DIFF = re.compile(r"(^(((-{3}) .+)|((\*{3}) .+))$\n?|^(={4}) .+(?= - ))")
+
+RE_INSERTED = re.compile(r"^(((&gt;)( .*)?)|((\+).*))$\n?")
+RE_DELETED = re.compile(r"^(((&lt;)( .*)?)|((-).*))$\n?")
+RE_FIRST = re.compile(r"""(?x)^
             (===\ modified\ file
             |==== \s* // .+ \s - \s .+ \s+ ====
             |Index:\ 
@@ -59,13 +73,18 @@ FIRST_LINE = re.compile(r"""(?x)^
             |diff\ --git\ 
             |commit\ [0-9a-f]{40}$
             )""")
-
 DIFF_RANGE_UNIFIED = re.compile(r"^(@@)\s*(.+?)\s*(@@)($\n?)?")
-FROM_FILE_DIFF = re.compile(r"(^(((-{3}) .+)|((\*{3}) .+))$\n?|^(={4}) .+(?= - ))")
-TO_FILE_DIFF = re.compile(r"(^(\+{3}) .+$\n?| (-) .* (={4})$\n?)")
-INSERTED_DIFF = re.compile(r"^(((&gt;)( .*)?)|((\+).*))$\n?")
-DELETED_DIFF = re.compile(r"^(((&lt;)( .*)?)|((-).*))$\n?")
 FILE_END = re.compile(r"^--\s")
+
+"""
+Regex to Style fix
+"""
+RE_SPACE_TAB = re.compile(r"((\s+)|(\t+))+")
+
+"""
+Diff object from diff-match-patch
+"""
+DIFF_OBJ = diff_match_patch.diff_match_patch()
 
 def get_line_kind(line):
     """
@@ -75,16 +94,16 @@ def get_line_kind(line):
     """
     if FILE_END.match(line):
         return END
-    elif FIRST_LINE.match(line):
+    elif RE_FIRST.match(line):
         return FIRST
     elif DIFF_RANGE_UNIFIED.match(line):
         return DIFF_RANGE
-    elif INSERTED_DIFF.match(line):
+    elif RE_INSERTED.match(line):
         return INSERTED
-    elif DELETED_DIFF.match(line):
+    elif RE_DELETED.match(line):
         return DELETED
     else:
-        return NO_CHANGE
+        return EQUAL
 
 FILE_LIST = [(pull_no, patch_no) for pull_no in range(MIM_PULL_NO, MAX_PULL_NO)
              for patch_no in range(1, 10)
@@ -93,8 +112,9 @@ FILE_NUM = len(FILE_LIST)
 
 with open(OUTPUT_PATH, "w") as output_diff:
     DIFF_WRITER = csv.writer(output_diff, lineterminator="\n")
-    DIFF_WRITER.writerow(("PullNo", "PatchNo", "Style", "CHANGED_CONTENTS",
-                          "OnlyInserted", "OnlyDeleted"))
+    DIFF_WRITER.writerow(("PullNo", "PatchNo", "CHANGED_CONTENTS",
+                          "SpaceOrTab", "NewLine", "UpperOrLower",
+                          "NoDeleted", "Inserted"))
 
     INSERTED_DOC = ""
     for i, FILE in enumerate(FILE_LIST):
@@ -108,6 +128,7 @@ with open(OUTPUT_PATH, "w") as output_diff:
 
         DIFF_FILE_PATH = DIFF_DIR_PATH + str(pull_no) + "_" + str(patch_no) + ".diff"
         with open(DIFF_FILE_PATH, "r") as diff_file:
+            # Get Inserted doc and Deleted doc
             if patch_no > 1:
                 OLD_INSERTED_DOC = INSERTED_DOC
 
@@ -127,24 +148,36 @@ with open(OUTPUT_PATH, "w") as output_diff:
                         INSERTED_DOC += re.sub(r'\+', ' ', _line, 1)
                     elif line_kind == DELETED:
                         DELETED_DOC += re.sub(r'-', ' ', _line, 1)
-                    elif line_kind == NO_CHANGE:
+                    elif line_kind == EQUAL:
                         INSERTED_DOC += _line
                         DELETED_DOC += _line
 
-            DIFF_OBJ = diff_match_patch.diff_match_patch()
+            # Get diffs
             if PER_PATCH and patch_no > 1:
-                DIFFS = DIFF_OBJ.diff_main(OLD_INSERTED_DOC, INSERTED_DOC)
+                DIFF_CONTENTS = DIFF_OBJ.diff_main(OLD_INSERTED_DOC, INSERTED_DOC)
             else:
-                DIFFS = DIFF_OBJ.diff_main(DELETED_DOC, INSERTED_DOC)
+                DIFF_CONTENTS = DIFF_OBJ.diff_main(DELETED_DOC, INSERTED_DOC)
 
-            INSERTED_CONTENTS = [x[1] for x in DIFFS if x[0] == INSERTED]
-            DELETED_CONTENTS = [x[1] for x in DIFFS if x[0] == DELETED]
-            CHANGED_CONTENTS = INSERTED_CONTENTS + DELETED_CONTENTS
+            INSERTED_CONTENTS = [x[1] for x in DIFF_CONTENTS if x[0] == INSERTED]
+            DELETED_CONTENTS = [x[1] for x in DIFF_CONTENTS if x[0] == DELETED]
+            # DIFF_CONTENTS = [x[1] for x in DIFF_CONTENTS]
 
-            # TODO: Define style be more detail
-            STYLE = [x for x in CHANGED_CONTENTS if x in (" ", "\n")]
+            # Get tags
+            NEW_LINE = [x[1] for x in DIFF_CONTENTS if x[1] == "\n"]
+            SPACE_OR_TAB = [x[1] for x in DIFF_CONTENTS if RE_SPACE_TAB.match(x[1])]
+
+            UPPER_OR_LOWER = 0
+            for j, x in enumerate(DIFF_CONTENTS):
+                if j > 0:
+                    before_diff = DIFF_CONTENTS[j - 1]
+                    if (x[0] == before_diff[0] * -1 and
+                            # re.compile(x[1], re.IGNORECASE).match(next_diff[1])):
+                            x[1].upper() == before_diff[1].upper()):
+                        UPPER_OR_LOWER += 1
+
             ONLY_INSERTED = len(DELETED_CONTENTS) == 0
             ONLY_DELETED = len(INSERTED_CONTENTS) == 0
 
-            DIFF_WRITER.writerow((pull_no, patch_no, len(STYLE),
-                                  len(CHANGED_CONTENTS), ONLY_INSERTED, ONLY_DELETED))
+            DIFF_WRITER.writerow((pull_no, patch_no, len(DIFF_CONTENTS),
+                                  len(SPACE_OR_TAB), len(NEW_LINE), UPPER_OR_LOWER,
+                                  ONLY_INSERTED, ONLY_DELETED))
