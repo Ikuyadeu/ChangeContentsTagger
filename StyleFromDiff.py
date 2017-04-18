@@ -54,11 +54,13 @@ FIRST = 2
 DIFF_RANGE = 3
 END = 4
 
+TO_FILE_DIFF = 5
+
 """
 Regex to identify diff column
 RE_FIRST:
 """
-# TO_FILE_DIFF = re.compile(r"(^(\+{3}) .+$\n?| (-) .* (={4})$\n?)")
+RE_TO_FILE_DIFF = re.compile(r"^(\+{3}) (.+)$\n?| (-) .* (={4})$\n?")
 # FROM_FILE_DIFF = re.compile(r"(^(((-{3}) .+)|((\*{3}) .+))$\n?|^(={4}) .+(?= - ))")
 
 RE_INSERTED = re.compile(r"^(((&gt;)( .*)?)|((\+).*))$\n?")
@@ -79,8 +81,9 @@ FILE_END = re.compile(r"^--\s")
 """
 Regex to Style fix
 """
-RE_SPACE_TAB = re.compile(r"^(\s|\t)+ $")
-RE_RENAME = re.compile(r"^\w$")
+RE_SPACE_TAB = re.compile(r"^(\s|\t)+$")
+RE_RENAME = re.compile(r"^\w+$")
+IMAGE = ["png", "gif", "jpg", "jpeg", "vg", "svgx"]
 
 """
 Diff object from diff-match-patch
@@ -99,6 +102,8 @@ def get_line_kind(line):
         return FIRST
     elif DIFF_RANGE_UNIFIED.match(line):
         return DIFF_RANGE
+    elif RE_TO_FILE_DIFF.match(line):
+        return TO_FILE_DIFF
     elif RE_INSERTED.match(line):
         return INSERTED
     elif RE_DELETED.match(line):
@@ -114,10 +119,10 @@ FILE_NUM = len(FILE_LIST)
 with open(OUTPUT_PATH, "w") as output_diff:
     # Setting csv writer
     DIFF_WRITER = csv.writer(output_diff, lineterminator="\n")
-    # output column Name
+    # Output column Name
     DIFF_WRITER.writerow(("PullNo", "PatchNo", "CHANGED_CONTENTS",
                           "SpaceOrTab", "NewLine", "UpperOrLower",
-                          "Renamed","IsInserted", "IsDeleted"))
+                          "Renamed", "Test", "Fig", "IsInserted", "IsDeleted"))
 
     INSERTED_DOC = ""
     for i, FILE in enumerate(FILE_LIST):
@@ -138,6 +143,8 @@ with open(OUTPUT_PATH, "w") as output_diff:
             INSERTED_DOC = ""
             DELETED_DOC = ""
             CHANGE_LINE = False
+            TEST_FILE = 0
+            FIG_FILE = 0
             for _line in diff_file:
                 line_kind = get_line_kind(_line)
                 if line_kind == END:
@@ -146,6 +153,12 @@ with open(OUTPUT_PATH, "w") as output_diff:
                     CHANGE_LINE = False
                 elif line_kind == DIFF_RANGE:
                     CHANGE_LINE = True
+                elif line_kind == TO_FILE_DIFF:
+                    file_name = RE_TO_FILE_DIFF.match(_line).group(2)
+                    if "test" in file_name:
+                        TEST_FILE += 1
+                    if any(x in file_name for x in IMAGE):
+                        FIG_FILE += 1
                 elif CHANGE_LINE:
                     if line_kind == INSERTED:
                         INSERTED_DOC += re.sub(r'\+', ' ', _line, 1)
@@ -180,10 +193,11 @@ with open(OUTPUT_PATH, "w") as output_diff:
                     if x[0] == before_diff[0] * -1:
                         if  x[1].upper() == before_diff[1].upper():
                             UPPER_OR_LOWER += 1
-                        if RE_RENAME.match(x[1]) and RE_RENAME.match(before_diff[1]):
+                        if x[1].isalnum() and before_diff[1].isalnum():
                             RENAME += 1
 
+            # Out put result
             DIFF_WRITER.writerow((pull_no, patch_no, len(DIFF_CONTENTS),
                                   len(SPACE_OR_TAB), len(NEW_LINE), UPPER_OR_LOWER,
-                                  RENAME,
+                                  RENAME, TEST_FILE, FIG_FILE,
                                   IS_INSERTED, IS_DELETED))

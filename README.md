@@ -1,17 +1,17 @@
 # Get Change Contents per patch from diff file
 ## feature
-* [ ] Style
+* [x] Style
     * [x] Space
     * [x] Tab
     * [x] New Line
     * [x] Upper or Lower
-    * [ ] Rename
+    * [x] Rename(Only alphabet)
 * [x] Inserted
 * [x] Deleted
 * [ ] Moved
-* [ ] Test
+* [x] Test
 * [ ] Document
-* [ ] Figure
+* [x] Figure
 * [ ] Abstract
 * [ ] Mistake
 * [ ] Version Control System
@@ -23,8 +23,4 @@ Please use python 2.7
 `OUTPUT_PATH`: OutPut file name
 
 ## TODO next
-* Style.Rename
-* Test
-* Document
-* Figure
 * Move
