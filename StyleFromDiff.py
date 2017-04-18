@@ -79,7 +79,8 @@ FILE_END = re.compile(r"^--\s")
 """
 Regex to Style fix
 """
-RE_SPACE_TAB = re.compile(r"((\s+)|(\t+))+")
+RE_SPACE_TAB = re.compile(r"^(\s|\t)+ $")
+RE_RENAME = re.compile(r"^\w$")
 
 """
 Diff object from diff-match-patch
@@ -116,7 +117,7 @@ with open(OUTPUT_PATH, "w") as output_diff:
     # output column Name
     DIFF_WRITER.writerow(("PullNo", "PatchNo", "CHANGED_CONTENTS",
                           "SpaceOrTab", "NewLine", "UpperOrLower",
-                          "IsInserted", "IsDeleted"))
+                          "Renamed","IsInserted", "IsDeleted"))
 
     INSERTED_DOC = ""
     for i, FILE in enumerate(FILE_LIST):
@@ -172,14 +173,17 @@ with open(OUTPUT_PATH, "w") as output_diff:
             SPACE_OR_TAB = [x[1] for x in DIFF_CONTENTS if RE_SPACE_TAB.match(x[1])]
 
             UPPER_OR_LOWER = 0
+            RENAME = 0
             for j, x in enumerate(DIFF_CONTENTS):
                 if j > 0:
                     before_diff = DIFF_CONTENTS[j - 1]
-                    if (x[0] == before_diff[0] * -1 and
-                            # re.compile(x[1], re.IGNORECASE).match(next_diff[1])):
-                            x[1].upper() == before_diff[1].upper()):
-                        UPPER_OR_LOWER += 1
+                    if x[0] == before_diff[0] * -1:
+                        if  x[1].upper() == before_diff[1].upper():
+                            UPPER_OR_LOWER += 1
+                        if RE_RENAME.match(x[1]) and RE_RENAME.match(before_diff[1]):
+                            RENAME += 1
 
             DIFF_WRITER.writerow((pull_no, patch_no, len(DIFF_CONTENTS),
                                   len(SPACE_OR_TAB), len(NEW_LINE), UPPER_OR_LOWER,
+                                  RENAME,
                                   IS_INSERTED, IS_DELETED))
