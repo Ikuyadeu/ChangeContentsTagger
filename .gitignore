@@ -1,4 +1,5 @@
 path-files/*
 diff_match_patch/*
 *.csv
+*xlsx
 *.tmLanguage

@@ -122,7 +122,8 @@ with open(OUTPUT_PATH, "w") as output_diff:
     # Output column Name
     DIFF_WRITER.writerow(("PullNo", "PatchNo", "CHANGED_CONTENTS",
                           "SpaceOrTab", "NewLine", "UpperOrLower",
-                          "Renamed", "Test", "Fig", "IsInserted", "IsDeleted"))
+                          "Renamed", "Test", "Fig",
+                          "IsInserted", "IsDeleted", "Moved"))
 
     INSERTED_DOC = ""
     for i, FILE in enumerate(FILE_LIST):
@@ -140,11 +141,13 @@ with open(OUTPUT_PATH, "w") as output_diff:
             if patch_no > 1:
                 OLD_INSERTED_DOC = INSERTED_DOC
 
-            INSERTED_DOC = ""
-            DELETED_DOC = ""
             CHANGE_LINE = False
             TEST_FILE = 0
             FIG_FILE = 0
+            INSERTEDS = []
+            DELETEDS = []
+            ONLY_IN = []
+            ONLY_DE = []
             for _line in diff_file:
                 line_kind = get_line_kind(_line)
                 if line_kind == END:
@@ -161,14 +164,18 @@ with open(OUTPUT_PATH, "w") as output_diff:
                         FIG_FILE += 1
                 elif CHANGE_LINE:
                     if line_kind == INSERTED:
-                        INSERTED_DOC += re.sub(r'\+', ' ', _line, 1)
+                        INSERTEDS.append(re.sub(r'\+', ' ', _line, 1))
+                        ONLY_IN.append(re.sub(r'\+', ' ', _line, 1))
                     elif line_kind == DELETED:
-                        DELETED_DOC += re.sub(r'-', ' ', _line, 1)
+                        DELETEDS.append(re.sub(r'-', ' ', _line, 1))
+                        ONLY_DE.append(re.sub(r'-', ' ', _line, 1))
                     elif line_kind == EQUAL:
-                        INSERTED_DOC += _line
-                        DELETED_DOC += _line
+                        INSERTEDS.append(_line)
+                        DELETEDS.append(_line)
 
             # Get diffs
+            INSERTED_DOC = ''.join(INSERTEDS)
+            DELETED_DOC = ''.join(DELETEDS)
             if PER_PATCH and patch_no > 1:
                 DIFF_CONTENTS = DIFF_OBJ.diff_main(OLD_INSERTED_DOC, INSERTED_DOC)
             else:
@@ -177,6 +184,10 @@ with open(OUTPUT_PATH, "w") as output_diff:
             INSERTED_CONTENTS = [x[1] for x in DIFF_CONTENTS if x[0] == INSERTED]
             DELETED_CONTENTS = [x[1] for x in DIFF_CONTENTS if x[0] == DELETED]
             # DIFF_CONTENTS = [x[1] for x in DIFF_CONTENTS]
+
+            MOVED = len(set(ONLY_IN) & set(ONLY_DE))
+            if len(ONLY_DE) + len(ONLY_IN) - MOVED > 0:
+                MOVED = float(MOVED) / (len(ONLY_DE) + len(ONLY_IN) - MOVED)
 
             # Get tags
             IS_INSERTED = len(INSERTED_CONTENTS) > 0
@@ -200,4 +211,4 @@ with open(OUTPUT_PATH, "w") as output_diff:
             DIFF_WRITER.writerow((pull_no, patch_no, len(DIFF_CONTENTS),
                                   len(SPACE_OR_TAB), len(NEW_LINE), UPPER_OR_LOWER,
                                   RENAME, TEST_FILE, FIG_FILE,
-                                  IS_INSERTED, IS_DELETED))
+                                  IS_INSERTED, IS_DELETED, MOVED))

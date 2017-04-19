@@ -6,13 +6,16 @@
     * [x] New Line
     * [x] Upper or Lower
     * [x] Rename(Only alphabet)
+        * [ ] File rename
 * [x] Inserted
 * [x] Deleted
-* [ ] Moved
+* [x] Moved
+    * [ ] Abstract
 * [x] Test
 * [ ] Document
+    * [ ] Binaly
+    * [ ] Source
 * [x] Figure
-* [ ] Abstract
 * [ ] Mistake
 * [ ] Version Control System
 
@@ -22,5 +25,9 @@ Please use python 2.7
 `DIFF_DIR_PATH`: Directory have diff file
 `OUTPUT_PATH`: OutPut file name
 
-## TODO next
-* Move
+## TODO
+* file rename
+* binaly doc
+* VCS
+
+* abstract
