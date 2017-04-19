@@ -62,7 +62,6 @@ RE_FIRST:
 """
 RE_TO_FILE_DIFF = re.compile(r"^\+{3} (.+)$\n?| - .* ={4}$\n?")
 RE_FROM_FILE_DIFF = re.compile(r"^-{3} (.+)$\n?| - .* ={4}$\n?")
-# FROM_FILE_DIFF = re.compile(r"(^(((-{3}) .+)|((\*{3}) .+))$\n?|^(={4}) .+(?= - ))")
 
 RE_INSERTED = re.compile(r"^(((&gt;)( .*)?)|((\+).*))$\n?")
 RE_DELETED = re.compile(r"^(((&lt;)( .*)?)|((-).*))$\n?")
@@ -79,6 +78,24 @@ RE_FIRST = re.compile(r"""(?x)^
 DIFF_RANGE_UNIFIED = re.compile(r"^(@@)\s*(.+?)\s*(@@)($\n?)?")
 FILE_END = re.compile(r"^--\s")
 RE_DATE = re.compile(r"^Date:\s(.*)\n?")
+
+REG_DICT = {END:FILE_END,
+            FIRST:RE_FIRST,
+            DIFF_RANGE:DIFF_RANGE_UNIFIED,
+            TO_FILE_DIFF:RE_TO_FILE_DIFF,
+            INSERTED:RE_INSERTED,
+            DELETED:RE_DELETED}
+def get_line_kind(line):
+    """
+    Get Line's kind value
+    @return integer
+    """
+    for key, reg in REG_DICT.items():
+        if reg.match(line):
+            return key
+
+    return EQUAL
+
 """
 Get Rename File
 """
@@ -111,27 +128,6 @@ Diff object from diff-match-patch
 """
 DIFF_OBJ = diff_match_patch.diff_match_patch()
 
-def get_line_kind(line):
-    """
-    noCHANGE_LINE 0
-    inserted line 1
-    deleted line -1
-    """
-    if FILE_END.match(line):
-        return END
-    elif RE_FIRST.match(line):
-        return FIRST
-    elif DIFF_RANGE_UNIFIED.match(line):
-        return DIFF_RANGE
-    elif RE_TO_FILE_DIFF.match(line):
-        return TO_FILE_DIFF
-    elif RE_INSERTED.match(line):
-        return INSERTED
-    elif RE_DELETED.match(line):
-        return DELETED
-    else:
-        return EQUAL
-
 FILE_LIST = [(pull_no, patch_no) for pull_no in range(MIM_PULL_NO, MAX_PULL_NO + 1)
              for patch_no in range(1, 10)
              if os.path.isfile(DIFF_DIR_PATH + str(pull_no) + "_" + str(patch_no) + ".diff")]
@@ -142,17 +138,15 @@ with open(OUTPUT_PATH, "w") as output_diff:
     DIFF_WRITER = csv.writer(output_diff, lineterminator="\n")
     # Output column Name
     DIFF_WRITER.writerow(("PullNo", "PatchNo", "Date", "CHANGED_CONTENTS",
-                          "SpaceOrTab", "NewLine", "UpperOrLower",
-                          "Renamed", "Test", "Fig", "BinaryDoc",  "RenameFile",
-                          "IsInserted", "IsDeleted", "Moved"))
+                          "SpaceOrTab", "NewLine", "UpperOrLower", "Renamed", "Moved",
+                          "Test", "Fig", "BinaryDoc", "RenameFile",
+                          "IsInserted", "IsDeleted"))
 
     INSERTED_DOC = ""
     for i, FILE in enumerate(FILE_LIST):
         pull_no = FILE[0]
         patch_no = FILE[1]
 
-        # sys.stdout.write("FILE:%d/%d, Pull No:%d/%d, Patch No:%d" % \
-        #                 (i, FILE_NUM, pull_no, MAX_PULL_NO, patch_no))
         print "FILE:%d/%d, Pull No:%d/%d, Patch No:%d" % \
         (i, FILE_NUM, pull_no, MAX_PULL_NO, patch_no)
 
@@ -218,17 +212,13 @@ with open(OUTPUT_PATH, "w") as output_diff:
             else:
                 DIFF_CONTENTS = DIFF_OBJ.diff_main(DELETED_DOC, INSERTED_DOC)
 
-            INSERTED_CONTENTS = [x[1] for x in DIFF_CONTENTS if x[0] == INSERTED]
-            DELETED_CONTENTS = [x[1] for x in DIFF_CONTENTS if x[0] == DELETED]
-            # DIFF_CONTENTS = [x[1] for x in DIFF_CONTENTS]
-
             MOVED = len(set(ONLY_IN) & set(ONLY_DE))
             if len(ONLY_DE) + len(ONLY_IN) - MOVED > 0:
                 MOVED = float(MOVED) / (len(ONLY_DE) + len(ONLY_IN) - MOVED)
 
             # Get tags
-            IS_INSERTED = len(INSERTED_CONTENTS) > 0
-            IS_DELETED = len(DELETED_CONTENTS) > 0
+            IS_INSERTED = any(x[0] == INSERTED for x in DIFF_CONTENTS)
+            IS_DELETED = any(x[0] == DELETED for x in DIFF_CONTENTS)
 
             NEW_LINE = [x[1] for x in DIFF_CONTENTS if x[1] == "\n"]
             SPACE_OR_TAB = [x[1] for x in DIFF_CONTENTS if RE_SPACE_TAB.match(x[1])]
@@ -247,5 +237,5 @@ with open(OUTPUT_PATH, "w") as output_diff:
             # Out put result
             DIFF_WRITER.writerow((pull_no, patch_no, CHANGED_DATE, len(DIFF_CONTENTS),
                                   len(SPACE_OR_TAB), len(NEW_LINE), UPPER_OR_LOWER,
-                                  RENAME, TEST_FILE, FIG_FILE, DOC_FILE, RENAME_FILE,
-                                  IS_INSERTED, IS_DELETED, MOVED))
+                                  RENAME, MOVED, TEST_FILE, FIG_FILE, DOC_FILE, RENAME_FILE,
+                                  IS_INSERTED, IS_DELETED))
