@@ -77,6 +77,7 @@ RE_FIRST = re.compile(r"""(?x)^
             )""")
 DIFF_RANGE_UNIFIED = re.compile(r"^(@@)\s*(.+?)\s*(@@)($\n?)?")
 FILE_END = re.compile(r"^--\s")
+RE_DATE = re.compile(r"^Date:\s(.*)\n?")
 
 """
 Regex to Style fix
@@ -121,7 +122,7 @@ with open(OUTPUT_PATH, "w") as output_diff:
     # Setting csv writer
     DIFF_WRITER = csv.writer(output_diff, lineterminator="\n")
     # Output column Name
-    DIFF_WRITER.writerow(("PullNo", "PatchNo", "CHANGED_CONTENTS",
+    DIFF_WRITER.writerow(("PullNo", "PatchNo", "Date", "CHANGED_CONTENTS",
                           "SpaceOrTab", "NewLine", "UpperOrLower",
                           "Renamed", "Test", "Fig", "BinaryDoc",
                           "IsInserted", "IsDeleted", "Moved"))
@@ -137,6 +138,14 @@ with open(OUTPUT_PATH, "w") as output_diff:
         (i, FILE_NUM, pull_no, MAX_PULL_NO, patch_no)
 
         DIFF_FILE_PATH = DIFF_DIR_PATH + str(pull_no) + "_" + str(patch_no) + ".diff"
+
+        """
+        Get Changed Date
+        """
+        CHANGED_DATES = [RE_DATE.match(x).group(1)
+                         for x in open(DIFF_FILE_PATH, "r") if RE_DATE.match(x)]
+        CHANGED_DATE = CHANGED_DATES[0] if len(CHANGED_DATES) > 0 else "NoDate"
+
         with open(DIFF_FILE_PATH, "r") as diff_file:
             # Get Inserted doc and Deleted doc
             if patch_no > 1:
@@ -212,7 +221,7 @@ with open(OUTPUT_PATH, "w") as output_diff:
                             RENAME += 1
 
             # Out put result
-            DIFF_WRITER.writerow((pull_no, patch_no, len(DIFF_CONTENTS),
+            DIFF_WRITER.writerow((pull_no, patch_no, CHANGED_DATE, len(DIFF_CONTENTS),
                                   len(SPACE_OR_TAB), len(NEW_LINE), UPPER_OR_LOWER,
                                   RENAME, TEST_FILE, FIG_FILE, DOC_FILE,
                                   IS_INSERTED, IS_DELETED, MOVED))

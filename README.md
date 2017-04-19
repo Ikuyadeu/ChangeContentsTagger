@@ -1,5 +1,6 @@
 # Get Change Contents per patch from diff file
 ## feature
+* [x] Date
 * [x] Style
     * [x] Space
     * [x] Tab
@@ -27,7 +28,6 @@ Please use python 2.7
 
 ## TODO
 * file rename
-* binaly doc
 * VCS
 
 * abstract
