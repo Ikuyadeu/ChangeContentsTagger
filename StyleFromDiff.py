@@ -84,6 +84,7 @@ Regex to Style fix
 RE_SPACE_TAB = re.compile(r"^(\s|\t)+$")
 RE_RENAME = re.compile(r"^\w+$")
 IMAGE = ["png", "gif", "jpg", "jpeg", "vg", "svgx"]
+BINARY_DOC = ["doc", "docx"]
 
 """
 Diff object from diff-match-patch
@@ -122,7 +123,7 @@ with open(OUTPUT_PATH, "w") as output_diff:
     # Output column Name
     DIFF_WRITER.writerow(("PullNo", "PatchNo", "CHANGED_CONTENTS",
                           "SpaceOrTab", "NewLine", "UpperOrLower",
-                          "Renamed", "Test", "Fig",
+                          "Renamed", "Test", "Fig", "BinaryDoc",
                           "IsInserted", "IsDeleted", "Moved"))
 
     INSERTED_DOC = ""
@@ -144,6 +145,7 @@ with open(OUTPUT_PATH, "w") as output_diff:
             CHANGE_LINE = False
             TEST_FILE = 0
             FIG_FILE = 0
+            DOC_FILE = 0
             INSERTEDS = []
             DELETEDS = []
             ONLY_IN = []
@@ -162,6 +164,8 @@ with open(OUTPUT_PATH, "w") as output_diff:
                         TEST_FILE += 1
                     if any(x in file_name for x in IMAGE):
                         FIG_FILE += 1
+                    if any(x in file_name for x in BINARY_DOC):
+                        DOC_FILE += 1
                 elif CHANGE_LINE:
                     if line_kind == INSERTED:
                         INSERTEDS.append(re.sub(r'\+', ' ', _line, 1))
@@ -210,5 +214,5 @@ with open(OUTPUT_PATH, "w") as output_diff:
             # Out put result
             DIFF_WRITER.writerow((pull_no, patch_no, len(DIFF_CONTENTS),
                                   len(SPACE_OR_TAB), len(NEW_LINE), UPPER_OR_LOWER,
-                                  RENAME, TEST_FILE, FIG_FILE,
+                                  RENAME, TEST_FILE, FIG_FILE, DOC_FILE,
                                   IS_INSERTED, IS_DELETED, MOVED))

@@ -13,7 +13,7 @@
     * [ ] Abstract
 * [x] Test
 * [ ] Document
-    * [ ] Binaly
+    * [x] Binaly
     * [ ] Source
 * [x] Figure
 * [ ] Mistake
