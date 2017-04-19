@@ -60,7 +60,8 @@ TO_FILE_DIFF = 5
 Regex to identify diff column
 RE_FIRST:
 """
-RE_TO_FILE_DIFF = re.compile(r"^(\+{3}) (.+)$\n?| (-) .* (={4})$\n?")
+RE_TO_FILE_DIFF = re.compile(r"^\+{3} (.+)$\n?| - .* ={4}$\n?")
+RE_FROM_FILE_DIFF = re.compile(r"^-{3} (.+)$\n?| - .* ={4}$\n?")
 # FROM_FILE_DIFF = re.compile(r"(^(((-{3}) .+)|((\*{3}) .+))$\n?|^(={4}) .+(?= - ))")
 
 RE_INSERTED = re.compile(r"^(((&gt;)( .*)?)|((\+).*))$\n?")
@@ -78,12 +79,30 @@ RE_FIRST = re.compile(r"""(?x)^
 DIFF_RANGE_UNIFIED = re.compile(r"^(@@)\s*(.+?)\s*(@@)($\n?)?")
 FILE_END = re.compile(r"^--\s")
 RE_DATE = re.compile(r"^Date:\s(.*)\n?")
+"""
+Get Rename File
+"""
+NULL_FILEA = r"--- /dev/null\n"
+NULL_FILEB = r"\+\+\+ /dev/null\n"
+
+ADD_FILE_RANGE = r"@@\s*-0,0\s*\+1,(\d+)\s*@@\n?"
+DEL_FILE_RANGE = r"@@\s*-1,(\d+)\s*\+0,0\s*@@\n?"
+
+ADD_FILE = NULL_FILEA + r"\+{3} .+\n" + ADD_FILE_RANGE
+DEL_FILE = NULL_FILEB + DEL_FILE_RANGE
+
+ADD_FILE = re.compile(ADD_FILE)
+DEL_FILE = re.compile(DEL_FILE)
 
 """
 Regex to Style fix
 """
 RE_SPACE_TAB = re.compile(r"^(\s|\t)+$")
 RE_RENAME = re.compile(r"^\w+$")
+
+"""
+File Extentions
+"""
 IMAGE = ["png", "gif", "jpg", "jpeg", "vg", "svgx"]
 BINARY_DOC = ["doc", "docx"]
 
@@ -124,7 +143,7 @@ with open(OUTPUT_PATH, "w") as output_diff:
     # Output column Name
     DIFF_WRITER.writerow(("PullNo", "PatchNo", "Date", "CHANGED_CONTENTS",
                           "SpaceOrTab", "NewLine", "UpperOrLower",
-                          "Renamed", "Test", "Fig", "BinaryDoc",
+                          "Renamed", "Test", "Fig", "BinaryDoc",  "RenameFile",
                           "IsInserted", "IsDeleted", "Moved"))
 
     INSERTED_DOC = ""
@@ -145,6 +164,11 @@ with open(OUTPUT_PATH, "w") as output_diff:
         CHANGED_DATES = [RE_DATE.match(x).group(1)
                          for x in open(DIFF_FILE_PATH, "r") if RE_DATE.match(x)]
         CHANGED_DATE = CHANGED_DATES[0] if len(CHANGED_DATES) > 0 else "NoDate"
+
+        ADD_RANGE = ADD_FILE.findall(open(DIFF_FILE_PATH, "r").read())
+        DEL_RANGE = DEL_FILE.findall(open(DIFF_FILE_PATH, "r").read())
+
+        RENAME_FILE = len(set(ADD_RANGE) & set(DEL_RANGE))
 
         with open(DIFF_FILE_PATH, "r") as diff_file:
             # Get Inserted doc and Deleted doc
@@ -168,7 +192,7 @@ with open(OUTPUT_PATH, "w") as output_diff:
                 elif line_kind == DIFF_RANGE:
                     CHANGE_LINE = True
                 elif line_kind == TO_FILE_DIFF:
-                    file_name = RE_TO_FILE_DIFF.match(_line).group(2)
+                    file_name = RE_TO_FILE_DIFF.match(_line).group(1)
                     if "test" in file_name:
                         TEST_FILE += 1
                     if any(x in file_name for x in IMAGE):
@@ -223,5 +247,5 @@ with open(OUTPUT_PATH, "w") as output_diff:
             # Out put result
             DIFF_WRITER.writerow((pull_no, patch_no, CHANGED_DATE, len(DIFF_CONTENTS),
                                   len(SPACE_OR_TAB), len(NEW_LINE), UPPER_OR_LOWER,
-                                  RENAME, TEST_FILE, FIG_FILE, DOC_FILE,
+                                  RENAME, TEST_FILE, FIG_FILE, DOC_FILE, RENAME_FILE,
                                   IS_INSERTED, IS_DELETED, MOVED))

@@ -7,7 +7,7 @@
     * [x] New Line
     * [x] Upper or Lower
     * [x] Rename(Only alphabet)
-        * [ ] File rename
+        * [x] File rename
 * [x] Inserted
 * [x] Deleted
 * [x] Moved
@@ -27,7 +27,6 @@ Please use python 2.7
 `OUTPUT_PATH`: OutPut file name
 
 ## TODO
-* file rename
 * VCS
 
 * abstract
