@@ -117,6 +117,9 @@ Regex to Style fix
 RE_SPACE_TAB = re.compile(r"^(\s|\t)+$")
 RE_RENAME = re.compile(r"^\w+$")
 
+RE_PLUS = re.compile(r"\+")
+RE_MINUS = re.compile(r"-")
+
 """
 File Extentions
 """
@@ -147,6 +150,9 @@ with open(OUTPUT_PATH, "w") as output_diff:
         pull_no = FILE[0]
         patch_no = FILE[1]
 
+        if patch_no > 1:
+            OLD_INSERTED_DOC = INSERTED_DOC
+
         print "FILE:%d/%d, Pull No:%d/%d, Patch No:%d" % \
         (i, FILE_NUM, pull_no, MAX_PULL_NO, patch_no)
 
@@ -164,19 +170,18 @@ with open(OUTPUT_PATH, "w") as output_diff:
 
         RENAME_FILE = len(set(ADD_RANGE) & set(DEL_RANGE))
 
+
+        CHANGE_LINE = False
+        TEST_FILE = 0
+        FIG_FILE = 0
+        DOC_FILE = 0
+        INSERTEDS = []
+        DELETEDS = []
+        ONLY_IN = []
+        ONLY_DE = []
+
         with open(DIFF_FILE_PATH, "r") as diff_file:
             # Get Inserted doc and Deleted doc
-            if patch_no > 1:
-                OLD_INSERTED_DOC = INSERTED_DOC
-
-            CHANGE_LINE = False
-            TEST_FILE = 0
-            FIG_FILE = 0
-            DOC_FILE = 0
-            INSERTEDS = []
-            DELETEDS = []
-            ONLY_IN = []
-            ONLY_DE = []
             for _line in diff_file:
                 line_kind = get_line_kind(_line)
                 if line_kind == END:
@@ -195,11 +200,11 @@ with open(OUTPUT_PATH, "w") as output_diff:
                         DOC_FILE += 1
                 elif CHANGE_LINE:
                     if line_kind == INSERTED:
-                        INSERTEDS.append(re.sub(r'\+', ' ', _line, 1))
-                        ONLY_IN.append(re.sub(r'\+', ' ', _line, 1))
+                        INSERTEDS.append(RE_PLUS.sub(' ', _line, 1))
+                        ONLY_IN.append(RE_PLUS.sub(' ', _line, 1))
                     elif line_kind == DELETED:
-                        DELETEDS.append(re.sub(r'-', ' ', _line, 1))
-                        ONLY_DE.append(re.sub(r'-', ' ', _line, 1))
+                        DELETEDS.append(RE_MINUS.sub(' ', _line, 1))
+                        ONLY_DE.append(RE_MINUS.sub(' ', _line, 1))
                     elif line_kind == EQUAL:
                         INSERTEDS.append(_line)
                         DELETEDS.append(_line)
