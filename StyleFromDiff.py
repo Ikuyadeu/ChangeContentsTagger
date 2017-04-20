@@ -79,6 +79,9 @@ DIFF_RANGE_UNIFIED = re.compile(r"^(@@)\s*(.+?)\s*(@@)($\n?)?")
 FILE_END = re.compile(r"^--\s")
 RE_DATE = re.compile(r"^Date:\s(.*)\n?")
 
+GIT_WORDS = '|'.join(["Git", "Merge", "Revert"])
+RE_SUBJECT = re.compile(r"Subject:\s\[PATCH\]\s(.*)(" + GIT_WORDS + r")(.*)\n?", re.IGNORECASE)
+
 REG_DICT = {END:FILE_END,
             FIRST:RE_FIRST,
             DIFF_RANGE:DIFF_RANGE_UNIFIED,
@@ -143,7 +146,7 @@ with open(OUTPUT_PATH, "w") as output_diff:
     DIFF_WRITER.writerow(("PullNo", "PatchNo", "Date", "CHANGED_CONTENTS",
                           "SpaceOrTab", "NewLine", "UpperOrLower", "Renamed", "Moved",
                           "Test", "Fig", "BinaryDoc", "RenameFile",
-                          "IsInserted", "IsDeleted"))
+                          "IsInserted", "IsDeleted", "VCS"))
 
     INSERTED_DOC = ""
     for i, FILE in enumerate(FILE_LIST):
@@ -158,15 +161,21 @@ with open(OUTPUT_PATH, "w") as output_diff:
 
         DIFF_FILE_PATH = DIFF_DIR_PATH + str(pull_no) + "_" + str(patch_no) + ".diff"
 
+        VSC = any(RE_SUBJECT.match(x) for x in open(DIFF_FILE_PATH, "r"))
+
         """
         Get Changed Date
         """
         CHANGED_DATES = [RE_DATE.match(x).group(1)
                          for x in open(DIFF_FILE_PATH, "r") if RE_DATE.match(x)]
-        CHANGED_DATE = CHANGED_DATES[0] if len(CHANGED_DATES) > 0 else "NoDate"
+        CHANGED_DATE = CHANGED_DATES[0] if len(CHANGED_DATES) > 0 else "None"
 
-        ADD_RANGE = ADD_FILE.findall(open(DIFF_FILE_PATH, "r").read())
-        DEL_RANGE = DEL_FILE.findall(open(DIFF_FILE_PATH, "r").read())
+        # CHANGED_SUBJECTS = [RE_SUBJECT.match(x).group(1)
+        #                     for x in open(DIFF_FILE_PATH, "r") if RE_SUBJECT.match(x)]
+        # CHANGED_SUBJECT = CHANGED_SUBJECTS[0] if len(CHANGED_SUBJECTS) > 0 else "None"
+        FILE_STRINGS = open(DIFF_FILE_PATH, "r").read()
+        ADD_RANGE = ADD_FILE.findall(FILE_STRINGS)
+        DEL_RANGE = DEL_FILE.findall(FILE_STRINGS)
 
         RENAME_FILE = len(set(ADD_RANGE) & set(DEL_RANGE))
 
@@ -243,4 +252,4 @@ with open(OUTPUT_PATH, "w") as output_diff:
             DIFF_WRITER.writerow((pull_no, patch_no, CHANGED_DATE, len(DIFF_CONTENTS),
                                   len(SPACE_OR_TAB), len(NEW_LINE), UPPER_OR_LOWER,
                                   RENAME, MOVED, TEST_FILE, FIG_FILE, DOC_FILE, RENAME_FILE,
-                                  IS_INSERTED, IS_DELETED))
+                                  IS_INSERTED, IS_DELETED, VSC))
