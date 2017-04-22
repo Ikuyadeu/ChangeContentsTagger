@@ -15,9 +15,17 @@ import diff_match_patch
 ARGV = sys.argv
 ARGC = len(ARGV)
 
-if ARGC > 2:
+if ARGC > 3:
     DIFF_DIR_PATH = ARGV[1] + "/"
     OUTPUT_PATH = ARGV[2]
+    if ARGC > 6:
+        MAX_PULL = int(ARGV[3])
+        MIN_PULL = int(ARGV[4])
+        EXTENSION = ARGV[5]
+    else:
+        MIN_PULL_NO = 1
+        MAX_PULL_NO = 500
+        EXTENSION = ".diff"
 else:
     print """Usage: python %s DIFF_DIR_PATH OUTPUT_PATH [-
     -per_patch] MAX_PULL MIN_PULL EXTENSION""" % ARGV[0]
@@ -30,14 +38,6 @@ if non Get diff from base code
 OPTIONS = [option for option in ARGV if option.startswith('--')]
 
 PER_PATCH = '--per_patch' in OPTIONS
-
-"""
-Reseach Patch range
-"""
-MIM_PULL_NO = 1
-MAX_PULL_NO = 500
-
-EXTENSION = ".diff"
 
 """
 Flag value
@@ -136,7 +136,7 @@ Diff object from diff-match-patch
 """
 DIFF_OBJ = diff_match_patch.diff_match_patch()
 
-FILE_LIST = [(pull_no, patch_no) for pull_no in range(MIM_PULL_NO, MAX_PULL_NO + 1)
+FILE_LIST = [(pull_no, patch_no) for pull_no in range(MIN_PULL_NO, MAX_PULL_NO + 1)
              for patch_no in range(1, 10)
              if os.path.isfile(DIFF_DIR_PATH + str(pull_no) + "_" + str(patch_no) + EXTENSION)]
 FILE_NUM = len(FILE_LIST)
