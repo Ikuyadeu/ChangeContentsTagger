@@ -133,7 +133,8 @@ IMAGE = ["png", "gif", "jpg", "jpeg", "vg", "svgx"]
 BINARY_DOC = ["doc", "docx"]
 
 """ Get start time """
-start = time.time()
+START = time.time()
+print time.strftime("START: %a, %d %b %Y %H:%M:%S", time.localtime())
 
 """
 Diff object from diff-match-patch
@@ -156,15 +157,14 @@ with open(OUTPUT_PATH, "w") as output_diff:
                           "IsInserted", "IsDeleted", "VCS"))
 
     INSERTED_DOC = ""
-    for i, FILE in enumerate(FILE_LIST):
+    for i, FILE in enumerate(FILE_LIST, 1):
         pull_no = FILE[0]
         patch_no = FILE[1]
 
         if patch_no > 1:
             OLD_INSERTED_DOC = INSERTED_DOC
-
-        print "FILE:%d/%d, Pull No:%d/%d, Patch No:%d" % \
-        (i, FILE_NUM, pull_no, MAX_PULL_NO, patch_no)
+        sys.stdout.write("\rFILE:%d/%d, Pull No:%d/%d, Patch No:%d" % \
+                        (i, FILE_NUM, pull_no, MAX_PULL_NO, patch_no))
 
         DIFF_FILE_PATH = DIFF_DIR_PATH + str(pull_no) + "_" + str(patch_no) + EXTENSION
 
@@ -262,7 +262,6 @@ with open(OUTPUT_PATH, "w") as output_diff:
                                   RENAME, MOVED, TEST_FILE, FIG_FILE, DOC_FILE, RENAME_FILE,
                                   IS_INSERTED, IS_DELETED, VSC))
 
-
-elapsed_time = time.time() - start
-print ("elapsed_time:{0}".format(elapsed_time)) + "[sec]"
-
+M, S = divmod(time.time() - START, 60)
+H, M = divmod(M, 60)
+print "\nELAPSED_TIME:%d:%02d:%02d" % (H, M, S)
