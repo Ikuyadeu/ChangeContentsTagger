@@ -42,7 +42,12 @@ And,
 * Be tool?
 
 ## Backlog(Work not yet planned)
-* abstract tag
+* abstract tag(blue)
+* if(yellow)
+* only kigou(green)
+* one line(orange)
+* comments(gray)
+* all same change(chairo)
 
 ## Deadline
 [SES](http://ses.sigse.jp/2017/)(May 12)

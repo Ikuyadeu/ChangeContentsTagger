@@ -90,14 +90,24 @@ REG_DICT = {END:FILE_END,
             DELETED:RE_DELETED}
 def get_line_kind(line):
     """
-    Get Line's kind value
-    @return integer
+    noCHANGE_LINE 0
+    inserted line 1
+    deleted line1
     """
-    for key, reg in REG_DICT.items():
-        if reg.match(line):
-            return key
-
-    return EQUAL
+    if FILE_END.match(line):
+        return END
+    elif RE_FIRST.match(line):
+        return FIRST
+    elif DIFF_RANGE_UNIFIED.match(line):
+        return DIFF_RANGE
+    elif RE_TO_FILE_DIFF.match(line):
+        return TO_FILE_DIFF
+    elif RE_INSERTED.match(line):
+        return INSERTED
+    elif RE_DELETED.match(line):
+        return DELETED
+    else:
+        return EQUAL
 
 """
 Get Rename File
