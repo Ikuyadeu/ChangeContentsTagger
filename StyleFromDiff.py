@@ -9,6 +9,7 @@ import csv
 import os
 import re
 import sys
+import time
 from collections import OrderedDict
 import diff_match_patch
 
@@ -130,6 +131,9 @@ File Extentions
 """
 IMAGE = ["png", "gif", "jpg", "jpeg", "vg", "svgx"]
 BINARY_DOC = ["doc", "docx"]
+
+""" Get start time """
+start = time.time()
 
 """
 Diff object from diff-match-patch
@@ -257,3 +261,8 @@ with open(OUTPUT_PATH, "w") as output_diff:
                                   FEW_CHANGE, IF_CHANGE, COMMENT,
                                   RENAME, MOVED, TEST_FILE, FIG_FILE, DOC_FILE, RENAME_FILE,
                                   IS_INSERTED, IS_DELETED, VSC))
+
+
+elapsed_time = time.time() - start
+print ("elapsed_time:{0}".format(elapsed_time)) + "[sec]"
+
