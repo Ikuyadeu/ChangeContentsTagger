@@ -10,6 +10,9 @@ Get Change Contents per patch from diff file
     * [x] Upper or Lower
     * [x] Rename(Only alphabet?)
         * [x] File rename(Identify line num?)
+    * [x] Symbol
+* [x] If
+* [x] Oneline Change
 * [x] Inserted:bool
 * [x] Deleted:bool
 * [x] Moved:integer
@@ -17,7 +20,7 @@ Get Change Contents per patch from diff file
 * [x] Test:integer
 * [ ] Document
     * [x] Binaly("doc", "docx"):integer
-    * [ ] Source
+    * [x] Comment(Only oneline)
 * [x] Figure("png", "gif", "jpg", "jpeg", "vg", "svgx"):integer
 * [ ] Mistake
 * [x] Version Control System(Git, Merge, Revert):bool
@@ -43,11 +46,6 @@ And,
 
 ## Backlog(Work not yet planned)
 * abstract tag(blue)
-* if(yellow)
-* only kigou(green)
-* one line(orange)
-* comments(gray)
-* all same change(chairo)
 
 ## Deadline
 [SES](http://ses.sigse.jp/2017/)(May 12)

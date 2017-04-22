@@ -9,6 +9,7 @@ import csv
 import os
 import re
 import sys
+from collections import OrderedDict
 import diff_match_patch
 
 ARGV = sys.argv
@@ -18,7 +19,8 @@ if ARGC > 2:
     DIFF_DIR_PATH = ARGV[1] + "/"
     OUTPUT_PATH = ARGV[2]
 else:
-    print "Usage: python %s DIFF_DIR_PATH OUTPUT_PATH [--per_patch]" % ARGV[0]
+    print """Usage: python %s DIFF_DIR_PATH OUTPUT_PATH [-
+    -per_patch] MAX_PULL MIN_PULL EXTENSION""" % ARGV[0]
     sys.exit()
 
 """"
@@ -29,13 +31,13 @@ OPTIONS = [option for option in ARGV if option.startswith('--')]
 
 PER_PATCH = '--per_patch' in OPTIONS
 
-
 """
 Reseach Patch range
 """
 MIM_PULL_NO = 1
 MAX_PULL_NO = 500
 
+EXTENSION = ".diff"
 
 """
 Flag value
@@ -81,33 +83,23 @@ RE_DATE = re.compile(r"^Date:\s(.*)\n?")
 
 GIT_WORDS = '|'.join(["Git", "Merge", "Revert"])
 RE_SUBJECT = re.compile(r"Subject:\s\[PATCH\]\s(.*)(" + GIT_WORDS + r")(.*)\n?", re.IGNORECASE)
+RE_IF = re.compile(r"^(\s|\t)*#?\s*if(.*)($\n?)?")
 
-REG_DICT = {END:FILE_END,
-            FIRST:RE_FIRST,
-            DIFF_RANGE:DIFF_RANGE_UNIFIED,
-            TO_FILE_DIFF:RE_TO_FILE_DIFF,
-            INSERTED:RE_INSERTED,
-            DELETED:RE_DELETED}
+REG_DICT = OrderedDict([(END, FILE_END),
+                        (FIRST, RE_FIRST),
+                        (DIFF_RANGE, DIFF_RANGE_UNIFIED),
+                        (TO_FILE_DIFF, RE_TO_FILE_DIFF),
+                        (INSERTED, RE_INSERTED),
+                        (DELETED, RE_DELETED)])
 def get_line_kind(line):
     """
-    noCHANGE_LINE 0
-    inserted line 1
-    deleted line1
+    Get Line's kind value
+    @return integer
     """
-    if FILE_END.match(line):
-        return END
-    elif RE_FIRST.match(line):
-        return FIRST
-    elif DIFF_RANGE_UNIFIED.match(line):
-        return DIFF_RANGE
-    elif RE_TO_FILE_DIFF.match(line):
-        return TO_FILE_DIFF
-    elif RE_INSERTED.match(line):
-        return INSERTED
-    elif RE_DELETED.match(line):
-        return DELETED
-    else:
-        return EQUAL
+    for key, reg in REG_DICT.items():
+        if reg.match(line):
+            return key
+    return EQUAL
 
 """
 Get Rename File
@@ -128,8 +120,8 @@ DEL_FILE = re.compile(DEL_FILE)
 Regex to Style fix
 """
 RE_SPACE_TAB = re.compile(r"^(\s|\t)+$")
-RE_RENAME = re.compile(r"^\w+$")
-
+RE_SYMBOL = re.compile(r"^([!-/:-@[-`{-~])+$")
+RE_COMMENT = re.compile(r"^(\s|\t)*(#|//)+(?!(if|else|include)).*($\n?)?")
 RE_PLUS = re.compile(r"\+")
 RE_MINUS = re.compile(r"-")
 
@@ -146,7 +138,7 @@ DIFF_OBJ = diff_match_patch.diff_match_patch()
 
 FILE_LIST = [(pull_no, patch_no) for pull_no in range(MIM_PULL_NO, MAX_PULL_NO + 1)
              for patch_no in range(1, 10)
-             if os.path.isfile(DIFF_DIR_PATH + str(pull_no) + "_" + str(patch_no) + ".diff")]
+             if os.path.isfile(DIFF_DIR_PATH + str(pull_no) + "_" + str(patch_no) + EXTENSION)]
 FILE_NUM = len(FILE_LIST)
 
 with open(OUTPUT_PATH, "w") as output_diff:
@@ -154,7 +146,8 @@ with open(OUTPUT_PATH, "w") as output_diff:
     DIFF_WRITER = csv.writer(output_diff, lineterminator="\n")
     # Output column Name
     DIFF_WRITER.writerow(("PullNo", "PatchNo", "Date", "CHANGED_CONTENTS",
-                          "SpaceOrTab", "NewLine", "UpperOrLower", "Renamed", "Moved",
+                          "SpaceOrTab", "NewLine", "UpperOrLower", "Symbol",
+                          "FewChange", "If", "Comment", "Renamed", "Moved",
                           "Test", "Fig", "BinaryDoc", "RenameFile",
                           "IsInserted", "IsDeleted", "VCS"))
 
@@ -169,7 +162,7 @@ with open(OUTPUT_PATH, "w") as output_diff:
         print "FILE:%d/%d, Pull No:%d/%d, Patch No:%d" % \
         (i, FILE_NUM, pull_no, MAX_PULL_NO, patch_no)
 
-        DIFF_FILE_PATH = DIFF_DIR_PATH + str(pull_no) + "_" + str(patch_no) + ".diff"
+        DIFF_FILE_PATH = DIFF_DIR_PATH + str(pull_no) + "_" + str(patch_no) + EXTENSION
 
         VSC = any(RE_SUBJECT.match(x) for x in open(DIFF_FILE_PATH, "r"))
 
@@ -180,15 +173,11 @@ with open(OUTPUT_PATH, "w") as output_diff:
                          for x in open(DIFF_FILE_PATH, "r") if RE_DATE.match(x)]
         CHANGED_DATE = CHANGED_DATES[0] if len(CHANGED_DATES) > 0 else "None"
 
-        # CHANGED_SUBJECTS = [RE_SUBJECT.match(x).group(1)
-        #                     for x in open(DIFF_FILE_PATH, "r") if RE_SUBJECT.match(x)]
-        # CHANGED_SUBJECT = CHANGED_SUBJECTS[0] if len(CHANGED_SUBJECTS) > 0 else "None"
         FILE_STRINGS = open(DIFF_FILE_PATH, "r").read()
         ADD_RANGE = ADD_FILE.findall(FILE_STRINGS)
         DEL_RANGE = DEL_FILE.findall(FILE_STRINGS)
 
         RENAME_FILE = len(set(ADD_RANGE) & set(DEL_RANGE))
-
 
         CHANGE_LINE = False
         TEST_FILE = 0
@@ -236,16 +225,20 @@ with open(OUTPUT_PATH, "w") as output_diff:
             else:
                 DIFF_CONTENTS = DIFF_OBJ.diff_main(DELETED_DOC, INSERTED_DOC)
 
-            MOVED = len(set(ONLY_IN) & set(ONLY_DE))
-            if len(ONLY_DE) + len(ONLY_IN) - MOVED > 0:
-                MOVED = float(MOVED) / (len(ONLY_DE) + len(ONLY_IN) - MOVED)
-
             # Get tags
             IS_INSERTED = any(x[0] == INSERTED for x in DIFF_CONTENTS)
             IS_DELETED = any(x[0] == DELETED for x in DIFF_CONTENTS)
 
-            NEW_LINE = [x[1] for x in DIFF_CONTENTS if x[1] == "\n"]
-            SPACE_OR_TAB = [x[1] for x in DIFF_CONTENTS if RE_SPACE_TAB.match(x[1])]
+            FEW_CHANGE = len(ONLY_IN) + len(ONLY_DE) < 2
+            MOVED = len(set(ONLY_IN) & set(ONLY_DE))
+            if len(ONLY_DE) + len(ONLY_IN) - MOVED > 0:
+                MOVED = float(MOVED) / (len(ONLY_DE) + len(ONLY_IN) - MOVED)
+            IF_CHANGE = IS_INSERTED and all(RE_IF.match(x) for x in ONLY_IN)
+            COMMENT = IS_INSERTED and all(RE_COMMENT.match(x) for x in ONLY_IN)
+
+            NEW_LINE = len([x[1] for x in DIFF_CONTENTS if x[1] == "\n"])
+            SPACE_OR_TAB = len([x[1] for x in DIFF_CONTENTS if RE_SPACE_TAB.match(x[1])])
+            IS_SYMBOL = len([x for x in DIFF_CONTENTS if RE_SYMBOL.match(x[1])])
 
             UPPER_OR_LOWER = 0
             RENAME = 0
@@ -260,6 +253,7 @@ with open(OUTPUT_PATH, "w") as output_diff:
 
             # Out put result
             DIFF_WRITER.writerow((pull_no, patch_no, CHANGED_DATE, len(DIFF_CONTENTS),
-                                  len(SPACE_OR_TAB), len(NEW_LINE), UPPER_OR_LOWER,
+                                  SPACE_OR_TAB, NEW_LINE, UPPER_OR_LOWER, IS_SYMBOL,
+                                  FEW_CHANGE, IF_CHANGE, COMMENT,
                                   RENAME, MOVED, TEST_FILE, FIG_FILE, DOC_FILE, RENAME_FILE,
                                   IS_INSERTED, IS_DELETED, VSC))
