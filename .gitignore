@@ -1,5 +1,6 @@
 path-files/*
-diff_match_patch/*
+__init__*
+*.pyc
 *.csv
 *xlsx
 *.tmLanguage
