@@ -11,7 +11,7 @@ import re
 import sys
 import time
 from collections import OrderedDict
-import diff_match_patch
+import diff_match_patch.diff_match_patch
 
 ARGV = sys.argv
 ARGC = len(ARGV)
