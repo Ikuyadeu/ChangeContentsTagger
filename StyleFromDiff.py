@@ -28,7 +28,7 @@ if ARGC > 3:
         MAX_PULL_NO = 500
         EXTENSION = ".diff"
 else:
-    print """Usage: python %s DIFF_DIR_PATH OUTPUT_PATH 
+    print """Usage: python %s DIFF_DIR_PATH OUTPUT_PATH
     MAX_PULL MIN_PULL EXTENSION [--per_patch]""" % ARGV[0]
     sys.exit()
 
@@ -225,10 +225,15 @@ with open(OUTPUT_PATH, "w") as output_diff:
             INSERTED_DOC = ''.join(INSERTEDS)
             DELETED_DOC = ''.join(DELETEDS)
             if PER_PATCH and patch_no > 1:
-                DIFF_CONTENTS = DIFF_OBJ.diff_main(OLD_INSERTED_DOC, INSERTED_DOC)
+                try:
+                    DIFF_CONTENTS = DIFF_OBJ.diff_main(OLD_INSERTED_DOC, INSERTED_DOC)
+                except ValueError:
+                    continue
             else:
-                DIFF_CONTENTS = DIFF_OBJ.diff_main(DELETED_DOC, INSERTED_DOC)
-
+                try:
+                    DIFF_CONTENTS = DIFF_OBJ.diff_main(DELETED_DOC, INSERTED_DOC)
+                except ValueError:
+                    continue
             # Get tags
             IS_INSERTED = any(x[0] == INSERTED for x in DIFF_CONTENTS)
             IS_DELETED = any(x[0] == DELETED for x in DIFF_CONTENTS)
