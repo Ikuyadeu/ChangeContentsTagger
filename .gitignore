@@ -1,5 +1,4 @@
 path-files/*
-__init__*
 *.pyc
 *.csv
 *xlsx
