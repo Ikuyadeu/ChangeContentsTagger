@@ -20,16 +20,16 @@ if ARGC > 3:
     DIFF_DIR_PATH = ARGV[1] + "/"
     OUTPUT_PATH = ARGV[2]
     if ARGC > 6:
-        MAX_PULL = int(ARGV[3])
-        MIN_PULL = int(ARGV[4])
+        MAX_PULL_NO = int(ARGV[3])
+        MIN_PULL_NO = int(ARGV[4])
         EXTENSION = ARGV[5]
     else:
         MIN_PULL_NO = 1
         MAX_PULL_NO = 500
         EXTENSION = ".diff"
 else:
-    print """Usage: python %s DIFF_DIR_PATH OUTPUT_PATH [-
-    -per_patch] MAX_PULL MIN_PULL EXTENSION""" % ARGV[0]
+    print """Usage: python %s DIFF_DIR_PATH OUTPUT_PATH 
+    MAX_PULL MIN_PULL EXTENSION [--per_patch]""" % ARGV[0]
     sys.exit()
 
 """"
