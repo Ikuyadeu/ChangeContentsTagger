@@ -152,8 +152,8 @@ with open(OUTPUT_PATH, "w") as output_diff:
     # Output column Name
     DIFF_WRITER.writerow(("PullNo", "PatchNo", "Date", "CHANGED_CONTENTS",
                           "SpaceOrTab", "NewLine", "UpperOrLower", "Symbol",
-                          "FewChange", "If", "Comment", "Renamed", "Moved",
-                          "Test", "Fig", "BinaryDoc", "RenameFile",
+                          "CHANGED_LINES", "FewChange", "If", "Comment", "Renamed", "Moved",
+                          "CHANGED_FILES", "Test", "Fig", "BinaryDoc", "RenameFile",
                           "IsInserted", "IsDeleted", "VCS"))
 
     INSERTED_DOC = ""
@@ -180,6 +180,7 @@ with open(OUTPUT_PATH, "w") as output_diff:
         FILE_STRINGS = open(DIFF_FILE_PATH, "r").read()
         ADD_RANGE = ADD_FILE.findall(FILE_STRINGS)
         DEL_RANGE = DEL_FILE.findall(FILE_STRINGS)
+        CHANGED_FILES = len(RE_FIRST.findall(FILE_STRINGS))
 
         RENAME_FILE = len(set(ADD_RANGE) & set(DEL_RANGE))
 
@@ -225,20 +226,18 @@ with open(OUTPUT_PATH, "w") as output_diff:
             INSERTED_DOC = ''.join(INSERTEDS)
             DELETED_DOC = ''.join(DELETEDS)
             if PER_PATCH and patch_no > 1:
-                try:
-                    DIFF_CONTENTS = DIFF_OBJ.diff_main(OLD_INSERTED_DOC, INSERTED_DOC)
-                except ValueError:
-                    continue
-            else:
-                try:
-                    DIFF_CONTENTS = DIFF_OBJ.diff_main(DELETED_DOC, INSERTED_DOC)
-                except ValueError:
-                    continue
+                DELETED_DOC = OLD_INSERTED_DOC
+            try:
+                DIFF_CONTENTS = DIFF_OBJ.diff_main(DELETED_DOC, INSERTED_DOC)
+            except ValueError:
+                continue
+
             # Get tags
             IS_INSERTED = any(x[0] == INSERTED for x in DIFF_CONTENTS)
             IS_DELETED = any(x[0] == DELETED for x in DIFF_CONTENTS)
 
-            FEW_CHANGE = len(ONLY_IN) + len(ONLY_DE) < 2
+            CHANGE_LINES = len(ONLY_IN) + len(ONLY_DE)
+            FEW_CHANGE = CHANGE_LINES < 2
             MOVED = len(set(ONLY_IN) & set(ONLY_DE))
             if len(ONLY_DE) + len(ONLY_IN) - MOVED > 0:
                 MOVED = float(MOVED) / (len(ONLY_DE) + len(ONLY_IN) - MOVED)
@@ -263,8 +262,8 @@ with open(OUTPUT_PATH, "w") as output_diff:
             # Out put result
             DIFF_WRITER.writerow((pull_no, patch_no, CHANGED_DATE, len(DIFF_CONTENTS),
                                   SPACE_OR_TAB, NEW_LINE, UPPER_OR_LOWER, IS_SYMBOL,
-                                  FEW_CHANGE, IF_CHANGE, COMMENT,
-                                  RENAME, MOVED, TEST_FILE, FIG_FILE, DOC_FILE, RENAME_FILE,
+                                  CHANGE_LINES, FEW_CHANGE, IF_CHANGE, COMMENT, RENAME, MOVED,
+                                  CHANGED_FILES, TEST_FILE, FIG_FILE, DOC_FILE, RENAME_FILE,
                                   IS_INSERTED, IS_DELETED, VSC))
 
 M, S = divmod(time.time() - START, 60)
