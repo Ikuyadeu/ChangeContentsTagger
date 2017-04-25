@@ -250,14 +250,29 @@ with open(OUTPUT_PATH, "w") as output_diff:
 
             UPPER_OR_LOWER = 0
             RENAME = 0
-            for j, x in enumerate(DIFF_CONTENTS):
+
+            IS_TAGGED = {}
+            for j, x in enumerate([y for y in DIFF_CONTENTS if y[0] != 0]):
+                if x[1] == "\n":
+                    NEW_LINE += 1
+                elif RE_SPACE_TAB.match(x[1]) and "space" not in IS_TAGGED:
+                    SPACE_OR_TAB += 1
+                    IS_TAGGED["space"] = True
+                if RE_SYMBOL.match(x[1]) and "symbol" not in IS_TAGGED:
+                    IS_SYMBOL += 1
+                    IS_TAGGED["symbol"] = True
                 if j > 0:
                     before_diff = DIFF_CONTENTS[j - 1]
                     if x[0] == before_diff[0] * -1:
-                        if  x[1].upper() == before_diff[1].upper():
+                        if  "upper" not in IS_TAGGED and x[1].upper() == before_diff[1].upper():
                             UPPER_OR_LOWER += 1
-                        if x[1].isalnum() and before_diff[1].isalnum():
+                            IS_TAGGED["upper"] = True
+                        if "rename" not in IS_TAGGED and\
+                         x[1].isalnum() and before_diff[1].isalnum():
                             RENAME += 1
+                            IS_TAGGED["rename"] = True
+                if x[1].find("\n") > 0:
+                    IS_TAGGED = {}
 
             # Out put result
             DIFF_WRITER.writerow((pull_no, patch_no, CHANGED_DATE, len(DIFF_CONTENTS),
