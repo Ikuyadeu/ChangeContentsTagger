@@ -281,7 +281,7 @@ with open(OUTPUT_PATH, "w") as output_diff:
                 if x[1].find("\n") > 0:
                     IS_TAGGED = {}
 
-            if CHANGE_LINE > 0:
+            if CHANGE_LINES > 0:
                 L_OTHER_PER = float(IF_CHANGE + COMMENT + MOVED + \
                 NEW_LINE + L_SPACE_OR_TAB + L_UPPER_OR_LOWER + L_IS_SYMBOL + L_RENAME)\
                  / CHANGE_LINES
