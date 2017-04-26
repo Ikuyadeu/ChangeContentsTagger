@@ -155,7 +155,8 @@ with open(OUTPUT_PATH, "w") as output_diff:
                           "CHANGED_LINES", "If", "Comment", "Moved",
                           "CHANGED_FILES", "Test", "Fig", "BinaryDoc", "RenameFile",
                           "IsInserted", "IsDeleted", "VCS", "FewChange",
-                          "L_SpaceOrTab", "L_UpperOrLower", "L_Symbol", "L_Renamed", "OtherPer"))
+                          "L_SpaceOrTab", "L_UpperOrLower", "L_Symbol", "L_Renamed",
+                          "L_OtherPer", "OtherPer"))
 
     INSERTED_DOC = ""
     for i, FILE in enumerate(FILE_LIST, 1):
@@ -281,7 +282,15 @@ with open(OUTPUT_PATH, "w") as output_diff:
                     IS_TAGGED = {}
 
             if CHANGE_LINE > 0:
-                OTHER_PER =  float(IF_CHANGE + COMMENT + MOVED + L_SPACE_OR_TAB + L_UPPER_OR_LOWER + L_IS_SYMBOL + L_RENAME) / CHANGE_LINES
+                L_OTHER_PER = float(IF_CHANGE + COMMENT + MOVED + \
+                NEW_LINE + L_SPACE_OR_TAB + L_UPPER_OR_LOWER + L_IS_SYMBOL + L_RENAME)\
+                 / CHANGE_LINES
+            else:
+                L_OTHER_PER = 0
+
+            if len(DIFF_CONTENTS) > 0:
+                OTHER_PER = float(SPACE_OR_TAB + NEW_LINE + UPPER_OR_LOWER + IS_SYMBOL + RENAME)\
+                 / len(DIFF_CONTENTS)
             else:
                 OTHER_PER = 0
             # Out put result
@@ -290,7 +299,8 @@ with open(OUTPUT_PATH, "w") as output_diff:
                                   CHANGE_LINES, IF_CHANGE, COMMENT, MOVED,
                                   CHANGED_FILES, TEST_FILE, FIG_FILE, DOC_FILE, RENAME_FILE,
                                   IS_INSERTED, IS_DELETED, VSC, FEW_CHANGE,
-                                  L_SPACE_OR_TAB, L_UPPER_OR_LOWER, L_IS_SYMBOL, L_RENAME, OTHER_PER))
+                                  L_SPACE_OR_TAB, L_UPPER_OR_LOWER, L_IS_SYMBOL, L_RENAME,
+                                  L_OTHER_PER, OTHER_PER))
 
 M, S = divmod(time.time() - START, 60)
 H, M = divmod(M, 60)
