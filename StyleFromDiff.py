@@ -151,10 +151,11 @@ with open(OUTPUT_PATH, "w") as output_diff:
     DIFF_WRITER = csv.writer(output_diff, lineterminator="\n")
     # Output column Name
     DIFF_WRITER.writerow(("PullNo", "PatchNo", "Date", "CHANGED_CONTENTS",
-                          "SpaceOrTab", "NewLine", "UpperOrLower", "Symbol",
-                          "CHANGED_LINES", "FewChange", "If", "Comment", "Renamed", "Moved",
+                          "SpaceOrTab", "NewLine", "UpperOrLower", "Symbol", "Renamed",
+                          "CHANGED_LINES", "If", "Comment", "Moved",
                           "CHANGED_FILES", "Test", "Fig", "BinaryDoc", "RenameFile",
-                          "IsInserted", "IsDeleted", "VCS"))
+                          "IsInserted", "IsDeleted", "VCS", "FewChange",
+                          "L_SpaceOrTab", "L_UpperOrLower", "L_Symbol", "L_Renamed", "OtherPer"))
 
     INSERTED_DOC = ""
     for i, FILE in enumerate(FILE_LIST, 1):
@@ -238,11 +239,11 @@ with open(OUTPUT_PATH, "w") as output_diff:
 
             CHANGE_LINES = len(ONLY_IN) + len(ONLY_DE)
             FEW_CHANGE = CHANGE_LINES < 2
-            MOVED = len(set(ONLY_IN) & set(ONLY_DE))
-            if len(ONLY_DE) + len(ONLY_IN) - MOVED > 0:
-                MOVED = float(MOVED) / (len(ONLY_DE) + len(ONLY_IN) - MOVED)
-            IF_CHANGE = IS_INSERTED and all(RE_IF.match(x) for x in ONLY_IN)
-            COMMENT = IS_INSERTED and all(RE_COMMENT.match(x) for x in ONLY_IN)
+            MOVED = len(set(ONLY_IN) & set(ONLY_DE)) / 2.0
+            # if len(ONLY_DE) + len(ONLY_IN) - MOVED > 0:
+            #     MOVED = float(MOVED) / (len(ONLY_DE) + len(ONLY_IN) - MOVED)
+            IF_CHANGE = len([x for x in ONLY_IN if  RE_IF.match(x)])
+            COMMENT = len([x for x in ONLY_IN if RE_COMMENT.match(x)])
 
             NEW_LINE = len([x[1] for x in DIFF_CONTENTS if x[1] == "\n"])
             SPACE_OR_TAB = len([x[1] for x in DIFF_CONTENTS if RE_SPACE_TAB.match(x[1])])
@@ -252,34 +253,44 @@ with open(OUTPUT_PATH, "w") as output_diff:
             RENAME = 0
 
             IS_TAGGED = {}
+            L_SPACE_OR_TAB = 0
+            L_IS_SYMBOL = 0
+            L_UPPER_OR_LOWER = 0
+            L_RENAME = 0
             for j, x in enumerate([y for y in DIFF_CONTENTS if y[0] != 0]):
-                if x[1] == "\n":
-                    NEW_LINE += 1
-                elif RE_SPACE_TAB.match(x[1]) and "space" not in IS_TAGGED:
-                    SPACE_OR_TAB += 1
+                if RE_SPACE_TAB.match(x[1]) and "space" not in IS_TAGGED:
+                    L_SPACE_OR_TAB += 1
                     IS_TAGGED["space"] = True
                 if RE_SYMBOL.match(x[1]) and "symbol" not in IS_TAGGED:
-                    IS_SYMBOL += 1
+                    L_IS_SYMBOL += 1
                     IS_TAGGED["symbol"] = True
                 if j > 0:
                     before_diff = DIFF_CONTENTS[j - 1]
                     if x[0] == before_diff[0] * -1:
-                        if  "upper" not in IS_TAGGED and x[1].upper() == before_diff[1].upper():
+                        if x[1].upper() == before_diff[1].upper():
                             UPPER_OR_LOWER += 1
-                            IS_TAGGED["upper"] = True
-                        if "rename" not in IS_TAGGED and\
-                         x[1].isalnum() and before_diff[1].isalnum():
+                            if "upper" not in IS_TAGGED:
+                                IS_TAGGED["upper"] = True
+                                L_UPPER_OR_LOWER += 1
+                        if x[1].isalnum() and before_diff[1].isalnum():
                             RENAME += 1
-                            IS_TAGGED["rename"] = True
+                            if "rename" not in IS_TAGGED:
+                                IS_TAGGED["rename"] = True
+                                L_RENAME += 1
                 if x[1].find("\n") > 0:
                     IS_TAGGED = {}
 
+            if CHANGE_LINE > 0:
+                OTHER_PER =  float(IF_CHANGE + COMMENT + MOVED + L_SPACE_OR_TAB + L_UPPER_OR_LOWER + L_IS_SYMBOL + L_RENAME) / CHANGE_LINES
+            else:
+                OTHER_PER = 0
             # Out put result
             DIFF_WRITER.writerow((pull_no, patch_no, CHANGED_DATE, len(DIFF_CONTENTS),
-                                  SPACE_OR_TAB, NEW_LINE, UPPER_OR_LOWER, IS_SYMBOL,
-                                  CHANGE_LINES, FEW_CHANGE, IF_CHANGE, COMMENT, RENAME, MOVED,
+                                  SPACE_OR_TAB, NEW_LINE, UPPER_OR_LOWER, IS_SYMBOL, RENAME,
+                                  CHANGE_LINES, IF_CHANGE, COMMENT, MOVED,
                                   CHANGED_FILES, TEST_FILE, FIG_FILE, DOC_FILE, RENAME_FILE,
-                                  IS_INSERTED, IS_DELETED, VSC))
+                                  IS_INSERTED, IS_DELETED, VSC, FEW_CHANGE,
+                                  L_SPACE_OR_TAB, L_UPPER_OR_LOWER, L_IS_SYMBOL, L_RENAME, OTHER_PER))
 
 M, S = divmod(time.time() - START, 60)
 H, M = divmod(M, 60)
