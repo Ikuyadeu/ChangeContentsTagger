@@ -14,10 +14,11 @@ with open("diff.csv", "r") as diff:
         outdate.write("Date\n")
         for row in reader:
             naive_date_str, _, offset_str = row['Date'].rpartition(' ')
-            if naive_date_str:
+
+            try:
                 Cdate = datetime.datetime.strptime(naive_date_str, "%a, %d %b %Y %H:%M:%S").strftime("%Y-%m-%d")
-                outdate.write(Cdate)
-            else:
-                outdate.write(Cdate)
+            except ValueError:
+                pass 
+            outdate.write(Cdate)
             outdate.write("\n")
             # print ndate
