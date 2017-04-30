@@ -7,7 +7,7 @@ cols <- c("#FF0000", "#00FF00", "#0000FF",
 per.contents.denominator <- ""
 per.contents.numerators <- c("")
 diffs$Date <- as.Date(diffs$Date)
-diffs <- subset(diffs, CHANGED_LINES > 0)
+diffs <- subset(diffs, CHANGED_LINES > 0 & PatchNo > 1)
 
 per.lines.denominator <- "ChangeLines"
 numerator.names <- c("NewLine", "If", "Comment", "L_SpaceOrTab", "L_UpperOrLower", "L_Symbol", "L_Renamed")
