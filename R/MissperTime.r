@@ -1,5 +1,5 @@
 library(xts)
-diffs <- read.csv("./devs.csv", sep = ',', header = TRUE, row.names = NULL)
+diffs <- read.csv("csv/devs.csv", sep = ',', header = TRUE, row.names = NULL)
 
 cols <- c("#FF0000", "#00FF00", "#0000FF",
           "#FFFF00", "#FF00FF", "#00FFFF", "#888888")
