@@ -3,7 +3,7 @@ diffs <- read.csv("./devs.csv", sep = ',', header = TRUE, row.names = NULL)
 cols <- c("#FF0000", "#00FF00", "#0000FF",
           "#FFFF00", "#FF00FF", "#00FFFF", "#888888")
 
-maxexp <- 10
+maxexp <- 100
 # maxexp <- max(diffs$exp)
 diffs <- subset(diffs, CHANGED_LINES > 0 & PatchNo > 1 & exp < maxexp)
 
@@ -20,9 +20,10 @@ for (i in 1:length(numerator.names)) {
     # boxplot(NewLine~exp, data = diffs, 
     #      xlim = c(0.0, maxexp), ylim = c(0.0, maxexp),
     #      xlab = "experience", ylab = "Miss")
-    pdf(paste("R/plot/", numerator.name, ".pdf", sep = ""))
-    boxplot(diffs[,numerator.name]~diffs$exp,
-            xlim = c(0.0, maxexp), ylim = c(0.0, maxexp),
+    # diffs[,numerator.name]　<- diffs[,numerator.name] / diffs$exp
+    pdf(paste("R/plot/", numerator.name, "3.pdf", sep = ""))
+    boxplot((diffs[,numerator.name] / diffs$exp)~diffs$exp,
+            xlim = c(0.0, maxexp), ylim = c(0.0, 1.0),
             xlab = "experience", ylab = numerator.name, col = cols[i])
     dev.off()
 }
