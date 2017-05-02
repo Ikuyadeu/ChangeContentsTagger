@@ -1,4 +1,4 @@
-diffs <- read.csv("/Users/yuki-ud/Documents/Source/ChangeContentsTagger/csv/devs2.csv", sep = ',', header = TRUE, row.names = NULL)
+diffs <- read.csv("csv/devs2.csv", sep = ',', header = TRUE, row.names = NULL)
 
 maxexp <- 100
 
