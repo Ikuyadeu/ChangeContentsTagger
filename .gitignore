@@ -6,7 +6,6 @@ path-files/*
 *Memo.md
 *.pptx
 *.pdf
-*.eps
 settings.json
 .Rhistory
 .Rapp.history
