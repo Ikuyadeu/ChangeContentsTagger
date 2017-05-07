@@ -1,5 +1,5 @@
 library(xts)
-diffs <- read.csv("csv/devs32.csv", sep = ',', header = TRUE, row.names = NULL)
+diffs <- read.csv("csv/devs3f.csv", sep = ',', header = TRUE, row.names = NULL)
 
 cols <- c("#FF0000", "#00FF00", "#0000FF",
           "#FFFF00", "#FF00FF", "#00FFFF", "#888888")
@@ -31,7 +31,7 @@ for(j in 1:length(projects)){
            ylab = "Small Change Per", xlab = "Date",
            cex.lab=1.5,cex.axis=2)
   legend("topright", legend = numerator.names, fill = cols, cex = 1.2)
-  dev.copy2eps(file=paste("R/plot/",proj, "/Time.eps", sep = ""))
+  dev.copy2eps(file=paste("R/plot/",proj, "/Timef.eps", sep = ""))
   
   dev.off()
 }

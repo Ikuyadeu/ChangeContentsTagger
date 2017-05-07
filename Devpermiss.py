@@ -29,7 +29,7 @@ with open('csv/newdiffs.csv', "r") as diff_file:
             if  patchNo == 1:
                 if i > 1:
                     outpull.update(developers[dev_id])
-                    # outpull.update(kinds_flag)
+                    outpull.update(kinds_flag)
                     writer.writerow(outpull)
                 
                 dev_id = pull["devId"]
