@@ -11,13 +11,13 @@ fieldnames = ["PullNo","patchNo","Date","CHANGED_CONTENTS","SpaceOrTab",
               "IsInserted","IsDeleted","VCS","FewChange",
               "L_SpaceOrTab","L_UpperOrLower","L_Symbol","L_Renamed","L_OtherPer","OtherPer","devId", "exp"]
 
-fieldnames = ["PullNo", "exp", "devId"]
-fieldnames = ["PullNo", "Date"]
+fieldnames = ["PullNo", "exp", "devId", "Date"]
+# fieldnames = ["PullNo", "Date"]
 fieldnames.extend(kinds)
 
 with open('csv/newdiffs.csv', "r") as diff_file:
     pulls = csv.DictReader(diff_file)
-    with open('csv/devs3.csv', "wb") as devfile:
+    with open('csv/devs2.csv', "wb") as devfile:
         developers = {}
         writer = csv.DictWriter(devfile, fieldnames)
         writer.writeheader()
@@ -28,8 +28,8 @@ with open('csv/newdiffs.csv', "r") as diff_file:
             patchNo =int(pull["PatchNo"]) 
             if  patchNo == 1:
                 if i > 1:
-                    # outpull.update(developers[dev_id])
-                    outpull.update(kinds_flag)
+                    outpull.update(developers[dev_id])
+                    # outpull.update(kinds_flag)
                     writer.writerow(outpull)
                 
                 dev_id = pull["devId"]
