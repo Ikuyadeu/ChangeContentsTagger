@@ -21,3 +21,5 @@ vignettes/*.pdf
 /cache/
 *.utf8.md
 *.knit.md
+.Rproj.user
+*.eps

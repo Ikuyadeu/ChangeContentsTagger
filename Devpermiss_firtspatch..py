@@ -12,12 +12,12 @@ fieldnames = ["PullNo","patchNo","Date","CHANGED_CONTENTS","SpaceOrTab",
               "L_SpaceOrTab","L_UpperOrLower","L_Symbol","L_Renamed","L_OtherPer","OtherPer","devId", "exp"]
 
 fieldnames = ["PullNo", "exp", "devId"]
-fieldnames = ["PullNo", "Date"]
+# fieldnames = ["PullNo", "Date"]
 fieldnames.extend(kinds)
 
 with open('csv/newdiffs.csv', "r") as diff_file:
     pulls = csv.DictReader(diff_file)
-    with open('csv/devs3.csv', "wb") as devfile:
+    with open('csv/devs2.csv', "wb") as devfile:
         developers = {}
         writer = csv.DictWriter(devfile, fieldnames)
         writer.writeheader()
@@ -30,8 +30,13 @@ with open('csv/newdiffs.csv', "r") as diff_file:
                 if i > 1:
                     # outpull.update(developers[dev_id])
                     outpull.update(kinds_flag)
-                    writer.writerow(outpull)
-                
+                    # writer.writerow(outpull)
+                    writer.writerow(developers[dev_id][kind])
+                for kind in kinds:
+                    if float(pull[kind]) > 0 and kinds_flag[kind] == 0:
+                        developers[dev_id][kind] += 1
+                        kinds_flag[kind] = 1
+
                 dev_id = pull["devId"]
                 outpull = {}
                 kinds_flag = {}
@@ -40,6 +45,8 @@ with open('csv/newdiffs.csv', "r") as diff_file:
                 if dev_id in developers:
                     developers[dev_id]["exp"] += 1
                     for kind in kinds:
+                        if float(pull[kind]) > 0:
+                            developers[dev_id][kind] += 1
                         kinds_flag[kind] = 0
                 else:
                     developers[dev_id] = {}
@@ -48,11 +55,5 @@ with open('csv/newdiffs.csv', "r") as diff_file:
                     for kind in kinds:
                         developers[dev_id][kind] = 0
                         kinds_flag[kind] = 0
-            else:
-                assert dev_id in developers, "dev_id not in developers"
-                for kind in kinds:
-                    if float(pull[kind]) > 0 and kinds_flag[kind] == 0:
-                        developers[dev_id][kind] += 1
-                        kinds_flag[kind] = 1
-
+                
             
