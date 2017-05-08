@@ -33,13 +33,14 @@ for(j in 1:length(projects)){
       #pdf(paste("plot/", numerator.name, "5.pdf", sep = ""))
       # peoplenum <- data.frame(xp = unique(diffs2$exp), yp = )
       # yp <- unique(diffs2$exp)
-      # print(prop.table(table(diffs2$exp, diffs2[,numerator.name]), margin = 1)[,2])
-      barplot(   prop.table(table(diffs2$exp, diffs2[,numerator.name]), margin = 1)[,2] ,
-              xlim = c(0.0, maxexp), ylim = c(0.0, 1.0),
+      # print(numerator.name)
+      # print(prop.table(table(diffs2$exp, diffs2[,numerator.name]), margin = 2))
+      barplot(   prop.table(table(diffs2$exp, diffs2[,numerator.name]), margin = 2)[,1] ,
+              xlim = c(0.0, maxexp), ylim = c(0.0, 0.1),
               xlab = "experience", ylab = nn2, col = cols[i],cex.lab=1.2,cex.axis=2)
-      dev.copy2eps(file=paste("R/plot/",proj,"/", nn2, "2.eps", sep = ""))
+      dev.copy2eps(file=paste("R/plot/",proj,"/", nn2, "1.eps", sep = ""))
       
-      dev.off()
+      # dev.off()
   }
 }
   # legend("topleft", legend = numerator.names, fill = cols, cex = 1.0)
