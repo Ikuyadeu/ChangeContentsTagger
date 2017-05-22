@@ -53,3 +53,9 @@ And,
 ## Done
 ### April
 * Get tag from 500 patch
+
+## TODO
+デザイン
+* 要求
+* プラットホーム
+* survey to wiki
