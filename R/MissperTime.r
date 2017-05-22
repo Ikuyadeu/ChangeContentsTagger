@@ -1,13 +1,26 @@
 library(xts)
-diffs <- read.csv("csv/devs3f.csv", sep = ',', header = TRUE, row.names = NULL)
+diffs <- read.csv("csv/devs32.csv", sep = ',', header = TRUE, row.names = NULL)
 
-cols <- c("#FF0000", "#00FF00", "#0000FF",
-          "#FFFF00", "#FF00FF", "#00FFFF", "#888888")
+# cols <- c("#FF0000", "#00FF00", "#0000FF",
+#           "#FFFF00", "#FF00FF", "#00FFFF", "#888888")
 
 diffs$Date <- as.Date(diffs$Date)
-
-numerator.names <- c("NewLine", "If", "Comment", "L_SpaceOrTab", "L_UpperOrLower", "L_Symbol", "L_Renamed")
-projects <- c("qt/qtbase", "qt-creator/qt-creator", "qt/qtdeclarative")
+# par(family = "HiraKakuProN-W3")
+# par(family = "Japan1GothicBBB")
+numerator.names <- c("Comment", "If", "Moved","NewLine",
+                     "L_Renamed", "RenameFile", "L_SpaceOrTab",  "L_Symbol", "L_UpperOrLower")
+numerator.names <- c("Comment", "If", "Moved","NewLine",
+                     "L_Renamed", "RenameFile", "L_SpaceOrTab",  "L_Symbol", "L_UpperOrLower")
+# numerator.names2 <- c("Comment     ", 
+#                       "If          ", 
+#                       "Moved       ",
+#                       "NewLine     ",
+#                       "Renamed     ",
+#                       "RenameFile  ",
+#                       "SpaceOrTab  ",
+#                       "Symbol      ",
+#                       "UpperOrLower")
+projects <- c("qt/qtbase", "qt-creator/qt-creator")
 for(j in 1:length(projects)){
   proj = projects[j]
   diffs2 <- subset(diffs,diffs$project == proj)
@@ -27,11 +40,13 @@ for(j in 1:length(projects)){
   #numerator.names <- append(numerator.names, "ALL")
   #cols <- append(cols, "#000000")
 
-  plot.zoo(ts, ylim = c(0, 1.0), col = cols, plot.type = "single", 
-           ylab = "Small Change Per", xlab = "Date",
-           cex.lab=1.5,cex.axis=2)
-  legend("topright", legend = numerator.names, fill = cols, cex = 1.2)
-  dev.copy2eps(file=paste("R/plot/",proj, "/Timef.eps", sep = ""))
+  plot.zoo(ts, ylim = c(0, 1.0), plot.type = "single",type="b", ylab = "Small Change Ratio", 
+           xlab = "Date", cex.lab=1.5,
+           cex.axis=2.0, lty=1:7,
+           pch = 1:7)
+　legend("topright", legend = numerator.names, lty=1:7, pch=1:7, cex = 1.2)
+           
+   dev.copy2eps(file=paste("/Users/yuki-ud/Documents/Paper/OSSresearch-SuperTeam/Review/Domestic/SES2017_Ueda/draft/fig/",proj, "/Time.eps", sep = ""))
   
-  dev.off()
+   dev.off()
 }

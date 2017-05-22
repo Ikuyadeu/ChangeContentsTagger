@@ -1,4 +1,5 @@
-diffs <- read.csv("csv/devs2f.csv", sep = ",", header = TRUE, row.names = NULL)
+
+diffs <- read.csv("csv/devs22.csv", sep = ",", header = TRUE, row.names = NULL)
 
 maxexp <- 50
 diffs <- subset(diffs, exp < maxexp)
@@ -6,28 +7,32 @@ diffs$Date <- as.Date(diffs$Date)
 
 event.date <- as.Date("2012-3-1")
 
-numerator.names <- c("NewLine", "If", "Comment",
-                     "L_SpaceOrTab", "L_UpperOrLower", "L_Symbol",
-                     "L_Renamed", "Moved", "RenameFile")
-# numerator.names <- c("NewLine")
-numerator.names2 <- c("NewLine", "If", "Comment",
-                     "SpaceOrTab", "UpperOrLower", "Symbol",
-                     "Renamed", "Moved", "RenameFile")
-# cols <- c("#FF0000", "#00FF00", "#0000FF",
-#           "#FFFF00", "#FF00FF", "#00FFFF", "#888888", "#FFFFFF", "#FF8800")
+numerator.names <- c("Comment", "If", "Moved","NewLine",
+                     "L_Renamed", "RenameFile", "L_SpaceOrTab",  "L_Symbol", "L_UpperOrLower")
+numerator.names2 <- c("Comment     ", 
+                      "If          ", 
+                      "Moved       ",
+                      "NewLine     ",
+                      "Renamed     ",
+                      "RenameFile  ",
+                      "SpaceOrTab  ",
+                      "Symbol      ",
+                      "UpperOrLower")
+cols <- c("#FF0000", "#00FF00", "#0000FF",
+          "#FFFF00", "#FF00FF", "#00FFFF", "#888888", "#FFFFFF", "#FF8800")
 projects <- c("qt/qtbase", "qt-creator/qt-creator")
-
-both.b <- c(c() , c())
-both.a <- c(c() , c())
+projects <- c("qt/qtbase")
+projects <- c("qt-creator/qt-creator")
+both.b <- c(x <- as.list(NULL) , x <- as.list(NULL))
+both.a <- c(x <- as.list(NULL) , x <- as.list(NULL))
 a <- c(c() , c())
 b <- c(c() , c())
 
 cols <- c("#FF0000", "#00FF00", "#0000FF", "#FFFF00")
 leg <- c("before:common", "after:common", "before:unit", "after:unit")
-
+pr <- c(c(), c())
 for (i in 1:length(numerator.names)) {
         numerator.name <- numerator.names[i]
-        par(mfcol = c(1, 2)) 
         for (j in 1:length(projects)) {
                 proj <- projects[j]
                 diffs2 <- subset(diffs, diffs$project == proj)
@@ -57,35 +62,34 @@ for (i in 1:length(numerator.names)) {
                 
                 after.both.dev$exp <- after.both.dev$exp - before.both.dev$exp 
 
-                nn2 <- numerator.names2[i]
-                both.b[j] <- before.both.dev[numerator.name] / before.both.dev$exp
-                both.a[j] <- (after.both.dev[numerator.name] - before.both.dev[numerator.name]) / after.both.dev$exp
-                b[j] <- before.dev[numerator.name] / before.dev$exp
-                a[j] <- after.dev[numerator.name] / after.dev$exp
-                if (j == 1){
-                boxplot(c(both.b[j], both.a[j], b[j], a[j])
-                ,main=projects[j]
-                ,names= c("O", "N", "OO", "ON")
-                ,ylim = c(0.0, 1.0), cex.axis=1.25,cex.main=1.5, cex=2)
-                }else{
-                boxplot(c(both.b[j], both.a[j], b[j], a[j])
-                ,yaxt="n"
-                ,main=projects[j]
-                ,names= c("O", "N", "OO", "ON")
-                ,ylim = c(0.0, 1.0), cex.axis=1.25,cex.main=1.5, cex=2)
-                }
+                bb <- unlist(before.both.dev[numerator.name]) / before.both.dev$exp
+                ab <- unlist(after.both.dev[numerator.name] - before.both.dev[numerator.name]) / after.both.dev$exp
+                long <- wilcox.test(unlist(before.both.dev[numerator.name]) / before.both.dev$exp, 
+                unlist(after.both.dev[numerator.name]) / after.both.dev$exp)$p.value
+                lb <- ifelse(long<0.05, "\verb|<| 0.05" , round(long, digits = 2))
+                # print(summary(bb)[["Median"]])
+                # print(bb[,1])
+                # print(paste(median(bb[,1]), median(ab[,1]), l,sep = " & "))
+
+                # print("short")
+                bs <- unlist(before.dev[numerator.name]) / before.dev$exp
+                as <- unlist(after.dev[numerator.name]) / after.dev$exp
+                short <- wilcox.test(bs, as)$p.value
+                ls <- ifelse(short<0.05, "\verb|<| 0.05" , round(short, digits = 2))
+                # print(head(bb))
+                print(paste(numerator.names2[i], round(median(bb), digits = 2), round(median(ab), digits = 2), lb , round(median(bs), digits = 2), round(median(as), digits = 2), paste(ls, "\\", sep = " ") ,sep =" & "))
         }
-        dev.copy2eps(file=paste("/Users/yuki-ud/Documents/Paper/OSSresearch-SuperTeam/Review/Domestic/SES2017_Ueda/draft/fig/",
-                "first/", nn2, ".eps", sep = ""))
-        dev.off()
+        # print("       ")
         # boxplot(c(both.b[1], both.a[1], b[1], a[1], both.b[2], both.a[2], b[2], a[2])
         #         ,xaxt="n"
         #         ,xlab=paste(projects[1], projects[2], sep= paste(rep(" ", 40), sep = "", collapse = ""))
-        #         ,ylim = c(0.0, 1.0), cex.lab=1.2, cex.axis=2)
+        #         ,ylim = c(0.0, 1.0),
+        #         main = nn2, col = cols, cex.lab=1.2, cex.axis=2)
         
-        # legend("topright", legend = leg, fill = cols, cex = 1.2)
-        # dev.copy2eps(file=paste("/Users/yuki-ud/Documents/Paper/OSSresearch-SuperTeam/Review/Domestic/SES2017_Ueda/draft/fig/",
-        # , "second/", nn2, ".eps", sep = ""))
+        # dev.copy2eps(file=paste("R/plot/second/", nn2, ".eps", sep = ""))
 
         # dev.off()
 }
+# for (j in 1:length(projects)) {
+#         print(pr[j])
+# }
