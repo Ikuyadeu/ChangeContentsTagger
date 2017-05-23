@@ -7,10 +7,10 @@ cols <- c("#FF0000", "#00FF00", "#0000FF",
 # maxexp <- max(diffs$exp)
 # diffs <- subset(diffs, exp < maxexp)
 
-numerator.names <- c("Comment", "If", "Moved","NewLine",
+numerator.names <- c("Comment", "If", "Moved", "NewLine",
                      "L_Renamed", "RenameFile", "L_SpaceOrTab",  "L_Symbol", "L_UpperOrLower")
-numerator.names2 <- c("Comment     ", 
-                      "If          ", 
+numerator.names2 <- c("Comment     ",
+                      "If          ",
                       "Moved       ",
                       "NewLine     ",
                       "Renamed     ",
@@ -27,17 +27,17 @@ for (j in 1:length(projects)){
   proj <- projects[j]
   print(proj)
   diffs2 <- subset(diffs, diffs$project == proj)
- 
+
   proj <- gsub("/", "-", proj)
 
  print(paste(nrow(subset(diffs2, diffs2$Date < edate)),
 nrow(subset(diffs2, diffs2$Date >= edate))))
   for (i in 1:length(numerator.names)) {
       numerator.name <- numerator.names[i]
-      print(paste(numerator.name, nrow(subset(diffs2, diffs2[numerator.name] > 0 & diffs2$Date < edate)),
-nrow(subset(diffs2, diffs2[numerator.name] > 0 & diffs2$Date >= edate)), sep=" & "))
-      # print(length(diffs$exp))
-      # print(length(diffs[,numerator.name]))
+      print(paste(numerator.name,
+      nrow(subset(diffs2, diffs2[numerator.name] > 0 & diffs2$Date < edate)),
+      nrow(subset(diffs2, diffs2[numerator.name] > 0 &
+                          diffs2$Date >= edate)), sep = " & "))
       # plot(x = diffs$exp, y = diffs[,numerator.name], 
       #      xlim = c(0.0, maxexp), ylim = c(0.0, maxexp),
       #      xlab = "experience", ylab = "Miss", col = cols[i])

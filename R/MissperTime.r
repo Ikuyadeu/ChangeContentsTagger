@@ -46,7 +46,8 @@ for(j in 1:length(projects)){
            pch = 1:7)
 　legend("topright", legend = numerator.names, lty=1:7, pch=1:7, cex = 1.2)
            
-   dev.copy2eps(file=paste("/Users/yuki-ud/Documents/Paper/OSSresearch-SuperTeam/Review/Domestic/SES2017_Ueda/draft/fig/",proj, "/Time.eps", sep = ""))
+   dev.copy2eps(file=paste("/Users/yuki-ud/Documents/Paper/OSSresearch-SuperTeam/Review/Domestic/SES2017_Ueda/draft/fig/",
+                proj, "/Time.eps", sep = ""))
   
    dev.off()
 }
