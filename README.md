@@ -37,9 +37,10 @@ And,
 * `OUTPUT_PATH`: OutPut file name
 
 ## TODO
-* visualize :Yoshigami
-* reseach tag coverage
-* per date
+* Fix Rename
+* Fix Comment
+
+* 自分で注意するのだから注意されにくい？
 
 ## On Deck
 * Be tool?
@@ -48,11 +49,9 @@ And,
 * abstract tag(blue)
 
 ## Deadline
-[SES](http://ses.sigse.jp/2017/)(May 12)
-
-## Done
-### April
-* Get tag from 500 patch
+* [x] [SES2017](http://ses.sigse.jp/2017/)(May 12)
+* [ ] [FOSE2017](http://fose.jssst.or.jp/fose2017/)(7/7)
+* [ ] [ICSE2017](http://www.icse2018.org/track/icse-2018-Important-dates)(8/25)
 
 ## TODO
 ### bot
@@ -65,5 +64,7 @@ And,
 * 注意されればされるほどミスをしなくなる
 * ミスをしてから次のパッチでもやらかす確率
 * Ifの発生割合 / Ifの指摘回数
-    * 指摘回数:今までに何回指摘されたか？
     * 最後にIfを修正してからのパッチ数
+
+* ifのどの部分を修正するか？
+* Renameをどう変えるか？
