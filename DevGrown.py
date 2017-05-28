@@ -5,7 +5,7 @@ import csv
 
 
 KINDS = ["NewLine", "If", "Comment", "L_SpaceOrTab",
-         "L_UpperOrLower", "L_Symbol", "L_Renamed", "Moved", "Test", "RenameFile"]
+         "L_UpperOrLower", "L_Symbol", "L_Renamed", "Moved", "RenameFile", "Test"]
 
 MISSES = [(x + ".miss") for x in KINDS]
 
@@ -28,9 +28,10 @@ with open('csv/devs22.csv', "r") as diff_file:
 
             if devId not in DEVELOPERS:
                 DEVELOPERS[devId] = developer
-
-            b_developer = DEVELOPERS[devId]            
-
-            for kind in KINDS:
-                developer[kind + ".miss"] =  0 if int(developer[kind]) > int(b_developer[kind]) else int(developer["exp"]) - int(b_developer["exp"])
+                for kind in KINDS:
+                    developer[kind + ".miss"] =  1 if int(developer[kind]) > 0 else 0
+            else:
+                for kind in KINDS:
+                    developer[kind + ".miss"] =  1 if int(developer[kind]) > int(DEVELOPERS[devId][kind]) else 0
             writer.writerow(developer)
+            DEVELOPERS[devId] = developer

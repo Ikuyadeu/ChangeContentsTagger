@@ -84,6 +84,7 @@ FindBugs, Pod, LCAnalyzer, Checkstyle, coverity
 * [neuton](https://github.com/openstack/neutron)(pylint(2013))(2010)
 * [openstack-ansible](https://github.com/openstack/openstack-ansible/blob/master/tox.ini)
 * [bandig](https://github.com/openstack/bandit)(pylint(2016))(2015)
+* [glance](https://github.com/openstack/glance)(pylint(2010))
 
 #### lintなし
 * [nova](https://github.com/openstack/nova)
@@ -108,9 +109,12 @@ FindBugs, Pod, LCAnalyzer, Checkstyle, coverity
     * PR数
     * レビュー期間
     * 再修正の数
-    * lintに引っかかる変更の数
+    * lintに引っかかるプルの数
     * pythonの変更数 / 全体の変更数
 * 期待する結果
     1. 条件１：lintが導入されなかった１年間，lint導入後の１年間では徐々にコミット数が増える
     2. 条件２：lintを導入した時の前後半年ではコミット数が急に減った
     3. 結果：lintを導入すればコミットしにくくなる
+
+* TODO:Openstackのレビューデータの収集
+* Qtプロジェクトのlint導入状況の確認
