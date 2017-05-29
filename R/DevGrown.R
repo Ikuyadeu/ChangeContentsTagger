@@ -1,4 +1,4 @@
-diffs <- read.csv("csv/missf.csv", sep = ",", header = TRUE, row.names = NULL)
+diffs <- read.csv("csv/miss.csv", sep = ",", header = TRUE, row.names = NULL)
 
 cols <- c("#FF0000", "#00FF00", "#0000FF",
           "#FFFF00", "#FF00FF", "#00FFFF", "#888888", "#FFFFFF", "#FF8800")
@@ -17,7 +17,7 @@ numerator.names2 <- c("Comment     ",
                       "SpaceOrTab  ",
                       "Symbol      ",
                       "UpperOrLower")
-# numerator.names <- c("L_Symbol")
+numerator.names <- c("NewLine")
 projects <- c("qt/qtbase")
 edate <- as.Date("2012-3-1")
 diffs$Date <- as.Date(diffs$Date)
@@ -45,9 +45,9 @@ for (j in 1:length(projects)){
       , main = numerator.names2[i]
       , ylim = c(0.0, 1.0), xlim = c(0, 50),
       cex.axis = 1.25, cex.main = 1.5, cex = 2)
-      dev.copy2eps(file=paste("/Users/yuki-ud/Documents/Source/ChangeContentsTagger/R/plot/grow/",
-      "first/", numerator.names2[i], ".eps", sep = ""))
-      dev.off()
+      # dev.copy2eps(file=paste("/Users/yuki-ud/Documents/Source/ChangeContentsTagger/R/plot/grow/",
+      # "second/", numerator.names2[i], ".eps", sep = ""))
+      # dev.off()
   }
 }
 # 0B4zoxduukAbQeFBEU2JBSjRwZ0E

@@ -4,6 +4,11 @@
         * どんなパッチがマージされるか：コメント，サブコミット
         * どんなパッチが早くアクセプトされるか：コメント，サブコミット，コミッターのパッチ
     * [ ] Code Review Quality: How Developers See It
+        * 何を基準にコードレビューするか？
+            * 
+        * レビューの何が大変か？
+            * 経験を積む
+            * ファイルが多い
     * [x] Writing Acceptable Patches: An Empirical Study of Open Source Project Patches
         * なんでリジェクトされるか
             * もっといい方法がある
@@ -40,8 +45,12 @@
     プルリクエストでは，何をリファーしているのか？
     * [ ]  Meaningful Identifier Names: The Case of Single-Letter Variables
     “I”以外にもsingle letterで頻繁に使われるものがあるので調査してみた．
-    * [ ] Effects of Variable Names on Comprehension: An Empirical Study
-    Variable namesの使われ方を調査している？
+    * [x] Effects of Variable Names on Comprehension: An Empirical Study
+        * 良くない変数名は良くある
+            * 抽象的すぎる
+            * あんまり使われない型
+            * 類語を使っている
+        * 動的に見ることで重要な値を特定できる
     * [ ] Binary Code Clone Detection across Architectures and Compiling Configurations
     * [ ] Identifying Code Clones having High Possibilities of Containing Bugs
     * [ ] Smells are sensitive to developers! On the efficiency of (un)guided customized detection
@@ -64,7 +73,7 @@
             * testの失敗
             * コーディングルールの違反
             * コンパイルエラー
-            *  VCSの問題
+            * VCSの問題
             * buildできない
 
 * ICSE
