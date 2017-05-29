@@ -79,7 +79,7 @@ FindBugs, Pod, LCAnalyzer, Checkstyle, coverity
 ### OpenStack project
 [Githubのサーチでスターが多い順](https://github.com/search?o=desc&q=org%3Aopenstack+&s=stars&type=Repositories&utf8=%E2%9C%93)
 #### lintあり
-* [cinder](https://github.com/openstack/cinder/blob/master/pylintrc)(pylint(2011))(2012)
+* [cinder](https://github.com/openstack/cinder/blob/master/pylintrc)(pylint(2012))(2011)
 * [horizon](https://github.com/openstack/horizon)(eslint(2015),pylint(2011))(2011)
 * [neuton](https://github.com/openstack/neutron)(pylint(2013))(2010)
 * [openstack-ansible](https://github.com/openstack/openstack-ansible/blob/master/tox.ini)
@@ -90,6 +90,12 @@ FindBugs, Pod, LCAnalyzer, Checkstyle, coverity
 * [nova](https://github.com/openstack/nova)
 * [swift](https://github.com/openstack/swift)
 * [kolla](https://github.com/openstack/kolla)
+
+### Qt project
+
+### [Mozilla](https://github.com/search?o=desc&q=org%3Amozilla&s=stars&type=Repositories&utf8=%E2%9C%93)
+
+#### lintなし
 
 ### Static Analysis
 [list](https://en.wikipedia.org/wiki/List_of_tools_for_static_code_analysis)
@@ -115,6 +121,6 @@ FindBugs, Pod, LCAnalyzer, Checkstyle, coverity
     1. 条件１：lintが導入されなかった１年間，lint導入後の１年間では徐々にコミット数が増える
     2. 条件２：lintを導入した時の前後半年ではコミット数が急に減った
     3. 結果：lintを導入すればコミットしにくくなる
-
+    
 * TODO:Openstackのレビューデータの収集
 * Qtプロジェクトのlint導入状況の確認
