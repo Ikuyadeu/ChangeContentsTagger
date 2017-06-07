@@ -14,7 +14,7 @@ ARGC = len(ARGV)
 if ARGC > 3:
     INPUT_PATH = ARGV[1] + "/"
     OUTPUT_PATH = ARGV[2]
-    if ARGC > 6:
+    if ARGC > 5:
         MAX_PULL_NO = int(ARGV[3])
         MIN_PULL_NO = int(ARGV[4])
         EXTENSION = ARGV[5]

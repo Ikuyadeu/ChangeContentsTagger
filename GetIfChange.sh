@@ -1,1 +1,1 @@
-python IfChange.py ../ueda_qt/patchs_diff_file_1_14 ./csv/if.csv 1 200 .txt
+python IfChange.py ../ueda_qt/patchs_diff_file_1_14 ./csv/if2.csv 700000 1 .txt
