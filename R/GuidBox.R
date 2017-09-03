@@ -6,13 +6,13 @@ diffs$Date <- as.Date(diffs$Date)
 
 event.date <- as.Date("2012-3-1")
 
-numerator.names <- c("NewLine", "If", "Comment",
+numerator.names <- c("NewLine",
                      "L_SpaceOrTab", "L_UpperOrLower", "L_Symbol",
-                     "L_Renamed", "Moved", "RenameFile")
+                     "L_Renamed",  "RenameFile")
 # numerator.names <- c("NewLine")
-numerator.names2 <- c("NewLine", "If", "Comment",
+numerator.names2 <- c("NewLine",
                      "SpaceOrTab", "UpperOrLower", "Symbol",
-                     "Renamed", "Moved", "RenameFile")
+                     "Renamed", "RenameFile")
 # cols <- c("#FF0000", "#00FF00", "#0000FF",
 #           "#FFFF00", "#FF00FF", "#00FFFF", "#888888", "#FFFFFF", "#FF8800")
 projects <- c("qt/qtbase", "qt-creator/qt-creator")

@@ -7,10 +7,9 @@ diffs$Date <- as.Date(diffs$Date)
 
 event.date <- as.Date("2012-3-1")
 
-numerator.names <- c("Comment", "If", "Moved","NewLine",
+numerator.names <- c("Comment", "Moved","NewLine",
                      "L_Renamed", "RenameFile", "L_SpaceOrTab",  "L_Symbol", "L_UpperOrLower")
 numerator.names2 <- c("Comment     ", 
-                      "If          ", 
                       "Moved       ",
                       "NewLine     ",
                       "Renamed     ",
