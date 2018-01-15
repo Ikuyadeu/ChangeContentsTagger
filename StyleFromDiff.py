@@ -28,8 +28,7 @@ if ARGC > 3:
         MAX_PULL_NO = 500
         EXTENSION = ".diff"
 else:
-    print """Usage: python %s DIFF_DIR_PATH OUTPUT_PATH
-    MAX_PULL MIN_PULL EXTENSION [--per_patch]""" % ARGV[0]
+    print """Usage: python %s DIFF_DIR_PATH OUTPUT_PATH MAX_PULL MIN_PULL EXTENSION [--per_patch]""" % ARGV[0]
     sys.exit()
 
 """"
